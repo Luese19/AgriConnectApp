@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Connection Test</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-top: 0;
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .status.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Firebase Connection Test</h1>
+        
+        <div th:if="${error}" class="status error">
+            <h2>Error</h2>
+            <p th:text="${error}"></p>
+        </div>
+        
+        <div th:if="${firebaseInitialized != null}">
+            <div th:class="${firebaseInitialized ? 'status success' : 'status error'}">
+                <h2>Firebase Initialization</h2>
+                <p th:if="${firebaseInitialized}">Firebase is properly initialized ✅</p>
+                <p th:unless="${firebaseInitialized}">Firebase is NOT initialized ❌</p>
+            </div>
+        </div>
+        
+        <div th:if="${firestoreConnected != null}">
+            <div th:class="${firestoreConnected ? 'status success' : 'status error'}">
+                <h2>Firestore Connection</h2>
+                <p th:if="${firestoreConnected}">Firestore connection is working ✅</p>
+                <p th:unless="${firestoreConnected}">Firestore connection failed ❌</p>
+            </div>
+        </div>
+        
+        <div th:if="${hasUsers != null}">
+            <div th:class="${hasUsers ? 'status success' : 'status warning'}">
+                <h2>Firebase Auth Users</h2>
+                <p th:if="${hasUsers}">Firebase Auth has users ✅</p>
+                <p th:unless="${hasUsers}">Firebase Auth has no users yet (this may be expected for a new project) ⚠️</p>
+            </div>
+        </div>
+        
+        <div th:if="${authError}" class="status error">
+            <h2>Firebase Auth Error</h2>
+            <p th:text="${authError}"></p>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <a href="/login" style="color: #3498db;">Back to Login</a>
+        </div>
+    </div>
+</body>
+</html>

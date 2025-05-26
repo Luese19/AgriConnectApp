@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head}">
+    <title>Shopping Cart - Buyer Dashboard</title>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{fragments/buyer-sidebar :: buyer-sidebar}"></nav>
+            
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Cart Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><i class="bi bi-cart me-2"></i>Shopping Cart</h1>
+                    <div>
+                        <button class="btn btn-outline-secondary me-2"><i class="bi bi-x-circle me-1"></i>Clear Cart</button>
+                        <button class="btn btn-primary"><i class="bi bi-arrow-right-short me-1"></i>Continue Shopping</button>
+                    </div>
+                </div>
+
+                <!-- Cart Content -->
+                <div class="row">
+                    <!-- Cart Items -->
+                    <div class="col-lg-8 mb-4">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Cart Items (3)</h5>
+                                    <small class="text-muted">Last updated: 5 minutes ago</small>
+                                </div>
+                            </div>
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th scope="col">Product Name</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col">Total Price</th>
+                                                <th scope="col">Status</th>
+                                                <th scope="col">Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Enhanced cart item display with product details -->
+                                            <tr th:each="detail : ${cartDetails}">
+                                                <td>
+                                                    <div class="d-flex align-items-center">
+                                                        <img th:src="${detail.product.itemImage}" class="rounded me-3" alt="Product Image" width="60">
+                                                        <div>
+                                                            <h6 class="mb-0" th:text="${detail.product.itemName}">Product Name</h6>
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td th:text="${detail.cartItem.quantity}">1</td>
+                                                <td th:text="'₱' + ${#numbers.formatDecimal(detail.total, 1, 'COMMA', 2, 'POINT')}">₱0.00</td>
+                                                <td>
+                                                    <span class="badge bg-success">In Cart</span>
+                                                </td>
+                                                <td>
+                                                    <form th:action="@{/buyer/cart/delete}" method="post">
+                                                        <input type="hidden" name="cartItemId" th:value="${detail.cartItem.cartItemId}" />
+                                                        <button type="submit" class="btn btn-sm btn-outline-danger">Cancel Order</button>
+                                                    </form>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${cartDetails.size()} == 0">
+                                                <td colspan="5" class="text-center">Your cart is empty.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div class="card-footer bg-white">
+                                <div class="d-flex align-items-center">
+                                    <div class="input-group me-3 cart-coupon-group">
+                                        <input type="text" class="form-control" placeholder="Coupon code" title="Coupon code">
+                                        <button class="btn btn-outline-secondary" type="button">Apply</button>
+                                    </div>
+                                    <button class="btn btn-outline-primary">Update Cart</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Summary -->
+                    <div class="col-lg-4 mb-4">
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Order Summary</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span>Subtotal</span>
+                                    <span>₱31.96</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span>Shipping</span>
+                                    <span>₱5.00</span>
+                                </div>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <span>Tax</span>
+                                    <span>₱2.84</span>
+                                </div>
+                                <hr>
+                                <div class="d-flex justify-content-between mb-3">
+                                    <strong>Total</strong>
+                                    <strong>₱39.80</strong>
+                                </div>
+                                <div class="d-grid gap-2">
+                                    <a href="/buyer/checkout" class="btn btn-primary btn-lg">
+                                        <i class="bi bi-lock-fill me-2"></i>Proceed to Checkout
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Shipping Options -->
+                        <div class="card mt-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Shipping Options</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="shippingOption" id="standard" checked>
+                                    <label class="form-check-label d-flex justify-content-between align-items-center" for="standard">
+                                        <div>
+                                            <span class="fw-bold">Standard Delivery</span>
+                                            <p class="text-muted small mb-0">2-4 business days</p>
+                                        </div>
+                                        <span>₱5.00</span>
+                                    </label>
+                                </div>
+                                <div class="form-check mb-3">
+                                    <input class="form-check-input" type="radio" name="shippingOption" id="express">
+                                    <label class="form-check-label d-flex justify-content-between align-items-center" for="express">
+                                        <div>
+                                            <span class="fw-bold">Express Delivery</span>
+                                            <p class="text-muted small mb-0">1-2 business days</p>
+                                        </div>
+                                        <span>₱9.99</span>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="shippingOption" id="pickup">
+                                    <label class="form-check-label d-flex justify-content-between align-items-center" for="pickup">
+                                        <div>
+                                            <span class="fw-bold">Pickup at Farm</span>
+                                            <p class="text-muted small mb-0">Select farms for pickup</p>
+                                        </div>
+                                        <span>Free</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Methods -->
+                        <div class="card mt-4">
+                            <div class="card-header bg-light">
+                                <h5 class="mb-0">Payment Methods</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="creditCard" checked>
+                                    <label class="form-check-label" for="creditCard">
+                                        Credit/Debit Card
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="paypal">
+                                    <label class="form-check-label" for="paypal">
+                                        PayPal
+                                    </label>
+                                </div>
+                                <div class="form-check mb-2">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="bankTransfer">
+                                    <label class="form-check-label" for="bankTransfer">
+                                        Bank Transfer
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="paymentMethod" id="cashOnDelivery">
+                                    <label class="form-check-label" for="cashOnDelivery">
+                                        Cash on Delivery
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Recommended Products -->
+                <section class="mb-5">
+                    <h3 class="mb-4"><i class="bi bi-basket3 me-2"></i>You Might Also Like</h3>
+                    <div class="row g-4">
+                        <!-- Recommended Product 1 -->
+                        <div class="col-md-4 col-lg-3">
+                            <div class="card product-card h-100">
+                                <img src="https://via.placeholder.com/300x200?text=Fresh+Basil" class="card-img-top" alt="Fresh Basil">
+                                <div class="card-body">
+                                    <h5 class="card-title">Fresh Organic Basil</h5>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-success fw-bold">$2.99/bunch</span>
+                                        <small class="text-muted">Herb Haven</small>
+                                    </div>
+                                    <p class="card-text small">Aromatic fresh basil, perfect for Italian dishes.</p>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-cart-plus me-1"></i>Add to Cart</button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-heart me-1"></i>Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recommended Product 2 -->
+                        <div class="col-md-4 col-lg-3">
+                            <div class="card product-card h-100">
+                                <img src="https://via.placeholder.com/300x200?text=Sourdough+Bread" class="card-img-top" alt="Sourdough Bread">
+                                <div class="card-body">
+                                    <h5 class="card-title">Artisan Sourdough Bread</h5>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-success fw-bold">$6.99/loaf</span>
+                                        <small class="text-muted">Village Bakery</small>
+                                    </div>
+                                    <p class="card-text small">Freshly baked sourdough with a perfect crust.</p>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-cart-plus me-1"></i>Add to Cart</button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-heart me-1"></i>Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recommended Product 3 -->
+                        <div class="col-md-4 col-lg-3">
+                            <div class="card product-card h-100">
+                                <img src="https://via.placeholder.com/300x200?text=Olive+Oil" class="card-img-top" alt="Olive Oil">
+                                <div class="card-body">
+                                    <h5 class="card-title">Extra Virgin Olive Oil</h5>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-success fw-bold">$15.99/bottle</span>
+                                        <small class="text-muted">Mediterranean Grove</small>
+                                    </div>
+                                    <p class="card-text small">Cold-pressed olive oil from local groves.</p>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-cart-plus me-1"></i>Add to Cart</button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-heart me-1"></i>Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Recommended Product 4 -->
+                        <div class="col-md-4 col-lg-3">
+                            <div class="card product-card h-100">
+                                <img src="https://via.placeholder.com/300x200?text=Garlic" class="card-img-top" alt="Fresh Garlic">
+                                <div class="card-body">
+                                    <h5 class="card-title">Fresh Garlic Bulbs</h5>
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <span class="text-success fw-bold">$1.99/bulb</span>
+                                        <small class="text-muted">Green Valley Farm</small>
+                                    </div>
+                                    <p class="card-text small">Locally grown garlic with intense flavor.</p>
+                                    <div class="d-flex justify-content-between">
+                                        <button class="btn btn-sm btn-primary"><i class="bi bi-cart-plus me-1"></i>Add to Cart</button>
+                                        <button class="btn btn-sm btn-outline-secondary"><i class="bi bi-heart me-1"></i>Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Order Placed Notification Modal -->
+    <div class="modal fade" id="orderPlacedModal" tabindex="-1" aria-labelledby="orderPlacedModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title" id="orderPlacedModalLabel"><i class="bi bi-check-circle-fill me-2"></i>Order Placed</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <p class="fs-5 mb-3">Your order has been placed successfully!</p>
+                    <button type="button" class="btn btn-success" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/buyer/order/all}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="checkoutModalLabel">Checkout</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="deliveryOption" class="form-label">Delivery Option</label>
+                            <select class="form-select" id="deliveryOption" name="deliveryOption" required>
+                                <option value="delivery">Deliver to my address</option>
+                                <option value="pickup">Pick up at farm</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="addressField">
+                            <label for="deliveryAddress" class="form-label">Delivery Address</label>
+                            <input type="text" class="form-control" id="deliveryAddress" name="deliveryAddress" placeholder="Enter your address" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentMethod" class="form-label">Payment Method</label>
+                            <select class="form-select" id="paymentMethod" name="paymentMethod" required>
+                                <option value="cod">Cash on Delivery</option>
+                                <option value="card">Credit/Debit Card</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Place Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    
+    <!-- Custom JavaScript for Cart Page -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Quantity buttons
+            const decrementButtons = document.querySelectorAll('.input-group button:first-child');
+            const incrementButtons = document.querySelectorAll('.input-group button:last-of-type');
+            const quantityInputs = document.querySelectorAll('.input-group input');
+            
+            decrementButtons.forEach((button, index) => {
+                button.addEventListener('click', function() {
+                    let currentValue = parseInt(quantityInputs[index].value);
+                    if (currentValue > 1) {
+                        quantityInputs[index].value = currentValue - 1;
+                        updateCartTotals();
+                    }
+                });
+            });
+            
+            incrementButtons.forEach((button, index) => {
+                button.addEventListener('click', function() {
+                    let currentValue = parseInt(quantityInputs[index].value);
+                    quantityInputs[index].value = currentValue + 1;
+                    updateCartTotals();
+                });
+            });
+            
+            // Delete item buttons
+            const deleteButtons = document.querySelectorAll('.btn-outline-danger');
+            deleteButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const row = this.closest('tr');
+                    row.classList.add('fade-out');
+                    setTimeout(() => {
+                        row.remove();
+                        updateCartTotals();
+                    }, 300);
+                });
+            });
+            
+            // Shipping option change
+            const shippingOptions = document.querySelectorAll('input[name="shippingOption"]');
+            shippingOptions.forEach(option => {
+                option.addEventListener('change', updateCartTotals);
+            });
+            
+            function updateCartTotals() {
+                // In a real app, this would recalculate the totals based on quantities
+                console.log('Cart totals updated');
+                
+                // Example implementation:
+                // 1. Get all quantities and prices
+                // 2. Calculate subtotal
+                // 3. Apply shipping cost based on selected shipping option
+                // 4. Calculate tax (if applicable)
+                // 5. Update the total
+            }
+            
+            // Continue Shopping button
+            document.querySelector('.btn-primary:not(.btn-lg)').addEventListener('click', function() {
+                window.location.href = '/buyer/products';
+            });
+        });
+        
+        // Show/hide address field based on delivery option
+        const deliveryOption = document.getElementById('deliveryOption');
+        const addressField = document.getElementById('addressField');
+        if (deliveryOption && addressField) {
+            deliveryOption.addEventListener('change', function() {
+                if (this.value === 'pickup') {
+                    addressField.style.display = 'none';
+                } else {
+                    addressField.style.display = '';
+                }
+            });
+        }
+    </script>
+</body>
+</html>

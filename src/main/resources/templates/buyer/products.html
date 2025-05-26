@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head}">
+    <title>Products - Buyer Dashboard</title>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{fragments/buyer-sidebar :: buyer-sidebar}"></nav>
+            
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">                <!-- Flash Messages -->
+                <div th:if="${message}" class="alert alert-success alert-dismissible fade show mt-3" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span th:text="${message}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                
+                <!-- Products Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><i class="bi bi-grid me-2"></i>Products</h1>
+                    <form method="get" action="/buyer/products" class="d-flex">
+                        <input type="hidden" name="category" th:value="${currentCategory}">
+                        <input type="hidden" name="priceRange" th:value="${currentPriceRange}">
+                        <input type="hidden" name="location" th:value="${currentLocation}">
+                        <input type="hidden" name="sortBy" th:value="${currentSortBy}">                        <div class="input-group search-container">
+                            <input type="text" name="search" class="form-control" placeholder="Search products..." 
+                                   th:value="${currentSearch}" aria-label="Search products">
+                            <button class="btn btn-outline-secondary" type="submit">
+                                <i class="bi bi-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Filter Section -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <form method="get" action="/buyer/products" id="filterForm">
+                            <input type="hidden" name="search" th:value="${currentSearch}">
+                            <div class="row">
+                                <div class="col-md-3 mb-3 mb-md-0">
+                                    <label for="categoryFilter" class="form-label">Category</label>
+                                    <select name="category" id="categoryFilter" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                                        <option value="">All Categories</option>
+                                        <option value="vegetables" th:selected="${currentCategory == 'vegetables'}">Vegetables</option>
+                                        <option value="fruits" th:selected="${currentCategory == 'fruits'}">Fruits</option>
+                                        <option value="dairy" th:selected="${currentCategory == 'dairy'}">Dairy Products</option>
+                                        <option value="meat" th:selected="${currentCategory == 'meat'}">Meat & Poultry</option>
+                                        <option value="eggs" th:selected="${currentCategory == 'eggs'}">Eggs</option>
+                                        <option value="honey" th:selected="${currentCategory == 'honey'}">Honey & Preserves</option>
+                                        <option value="herbs" th:selected="${currentCategory == 'herbs'}">Herbs & Spices</option>
+                                        <option value="organic" th:selected="${currentCategory == 'organic'}">Organic</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3 mb-md-0">
+                                    <label for="priceFilter" class="form-label">Price Range</label>
+                                    <select name="priceRange" id="priceFilter" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                                        <option value="">All Prices</option>
+                                        <option value="under5" th:selected="${currentPriceRange == 'under5'}">Under ₱5</option>
+                                        <option value="5-10" th:selected="${currentPriceRange == '5-10'}">₱5 - ₱10</option>
+                                        <option value="10-20" th:selected="${currentPriceRange == '10-20'}">₱10 - ₱20</option>
+                                        <option value="over20" th:selected="${currentPriceRange == 'over20'}">Over ₱20</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-3 mb-md-0">
+                                    <label for="locationFilter" class="form-label">Location</label>
+                                    <input type="text" name="location" id="locationFilter" class="form-control" 
+                                           placeholder="Enter location..." th:value="${currentLocation}"
+                                           onchange="document.getElementById('filterForm').submit()">
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="sortOrder" class="form-label">Sort By</label>
+                                    <select name="sortBy" id="sortOrder" class="form-select" onchange="document.getElementById('filterForm').submit()">
+                                        <option value="recommended" th:selected="${currentSortBy == 'recommended' or currentSortBy == null}">Recommended</option>
+                                        <option value="priceAsc" th:selected="${currentSortBy == 'priceAsc'}">Price: Low to High</option>
+                                        <option value="priceDesc" th:selected="${currentSortBy == 'priceDesc'}">Price: High to Low</option>
+                                        <option value="nameAsc" th:selected="${currentSortBy == 'nameAsc'}">Name: A to Z</option>
+                                        <option value="nameDesc" th:selected="${currentSortBy == 'nameDesc'}">Name: Z to A</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </form>
+                          <!-- Active Filters Display -->
+                        <div class="mt-3 d-flex flex-wrap align-items-center active-filters" th:if="${currentCategory != null or currentPriceRange != null or currentLocation != null or currentSearch != null}">
+                            <span class="me-2">Active Filters:</span>
+                            <span class="me-2 mb-2 d-inline-block" th:if="${currentCategory != null and currentCategory != ''}">
+                                <span class="badge rounded-pill bg-primary p-2">
+                                    Category: <span th:text="${currentCategory}"></span>
+                                    <a th:href="@{/buyer/products(priceRange=${currentPriceRange}, location=${currentLocation}, sortBy=${currentSortBy}, search=${currentSearch})}" 
+                                       class="filter-badge-link text-white ms-1">
+                                        <i class="bi bi-x-circle"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="me-2 mb-2 d-inline-block" th:if="${currentPriceRange != null and currentPriceRange != ''}">
+                                <span class="badge rounded-pill bg-success p-2">
+                                    Price: <span th:text="${currentPriceRange}"></span>
+                                    <a th:href="@{/buyer/products(category=${currentCategory}, location=${currentLocation}, sortBy=${currentSortBy}, search=${currentSearch})}" 
+                                       class="filter-badge-link text-white ms-1">
+                                        <i class="bi bi-x-circle"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="me-2 mb-2 d-inline-block" th:if="${currentLocation != null and currentLocation != ''}">
+                                <span class="badge rounded-pill bg-info p-2">
+                                    Location: <span th:text="${currentLocation}"></span>
+                                    <a th:href="@{/buyer/products(category=${currentCategory}, priceRange=${currentPriceRange}, sortBy=${currentSortBy}, search=${currentSearch})}" 
+                                       class="filter-badge-link text-white ms-1">
+                                        <i class="bi bi-x-circle"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <span class="me-2 mb-2 d-inline-block" th:if="${currentSearch != null and currentSearch != ''}">
+                                <span class="badge rounded-pill bg-warning p-2">
+                                    Search: <span th:text="${currentSearch}"></span>
+                                    <a th:href="@{/buyer/products(category=${currentCategory}, priceRange=${currentPriceRange}, location=${currentLocation}, sortBy=${currentSortBy})}" 
+                                       class="filter-badge-link text-white ms-1">
+                                        <i class="bi bi-x-circle"></i>
+                                    </a>
+                                </span>
+                            </span>
+                            <a href="/buyer/products" class="btn btn-sm btn-outline-secondary ms-auto">Clear All Filters</a>
+                        </div>
+                    </div>
+                </div>                <!-- Products Grid -->
+                <div class="row g-4 mb-4">
+                    <!-- Loop through products -->
+                    <div class="col-md-4 col-lg-3" th:each="product : ${products}">
+                        <div class="card product-card h-100 position-relative">                            <!-- Stock indicator -->
+                            <div class="stock-indicator" th:if="${product.itemQuantity != null}">
+                                <span class="badge stock-low" th:if="${product.itemQuantity != null and T(java.lang.Integer).parseInt(product.itemQuantity) <= 5 and T(java.lang.Integer).parseInt(product.itemQuantity) > 0}">
+                                    Low Stock
+                                </span>
+                                <span class="badge stock-out" th:if="${product.itemQuantity != null and T(java.lang.Integer).parseInt(product.itemQuantity) <= 0}">
+                                    Out of Stock
+                                </span>
+                            </div>
+                            
+                            <img th:src="${product.itemImage}" class="card-img-top" th:alt="${product.itemName}" alt="Product Image">
+                            <div class="card-body d-flex flex-column">
+                                <div class="mb-2">
+                                    <span class="badge bg-secondary product-category" th:text="${product.itemCategory}">Category</span>
+                                </div>
+                                <h5 class="card-title" th:text="${product.itemName}">Product Name</h5>
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <span class="product-price" th:text="'₱' + ${product.itemPrice}">₱0.00</span>
+                                    <small class="product-location" th:text="${product.location}">Location</small>
+                                </div>
+                                <p class="card-text small flex-grow-1" th:text="${product.itemDescription}">Product description</p>
+                                
+                                <!-- Quantity available -->
+                                <div class="mb-2" th:if="${product.itemQuantity != null}">
+                                    <small class="text-muted">Available: <span th:text="${product.itemQuantity}">0</span> units</small>
+                                </div>
+                                
+                                <!-- Action buttons -->
+                                <div class="product-actions mt-auto">
+                                    <form th:action="@{/buyer/cart/add}" method="post" class="d-inline">
+                                        <input type="hidden" name="productId" th:value="${product.itemId}" />
+                                        <div class="d-flex align-items-center mb-2">
+                                            <label for="quantity-input-${product.itemId}" class="form-label me-2 mb-0 small" th:for="'quantity-input-' + ${product.itemId}">Qty:</label>
+                                            <input type="number" name="quantity" id="quantity-input-${product.itemId}" th:id="'quantity-input-' + ${product.itemId}" 
+                                                   class="form-control quantity-input" value="1" min="1" 
+                                                   th:max="${product.itemQuantity != null ? product.itemQuantity : 999}"
+                                                   title="Quantity to order" placeholder="Quantity">
+                                        </div>                                        <button type="submit" class="btn btn-sm btn-primary btn-add-cart w-100" 
+                                                th:disabled="${product.itemQuantity != null and T(java.lang.Integer).parseInt(product.itemQuantity) <= 0}">
+                                            <i class="bi bi-cart-plus me-1"></i>Add to Cart
+                                        </button>
+                                    </form>                                    <a th:href="@{/buyer/checkout(productId=${product.itemId})}" 
+                                       class="btn btn-sm btn-success btn-order-now w-100 mt-2"
+                                       th:classappend="${product.itemQuantity != null and T(java.lang.Integer).parseInt(product.itemQuantity) <= 0 ? 'disabled' : ''}">
+                                        <i class="bi bi-bag-check me-1"></i>Order Now
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- No products found message -->
+                    <div class="col-12" th:if="${products.isEmpty()}">
+                        <div class="text-center py-5">
+                            <i class="bi bi-search display-4 text-muted"></i>
+                            <h5 class="mt-3 text-muted">No products found</h5>
+                            <p class="text-muted">Try adjusting your filters or search terms</p>
+                            <a href="/buyer/products" class="btn btn-primary">Clear All Filters</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Pagination -->
+                <nav aria-label="Product pagination" class="my-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            </main>
+        </div>
+    </div>
+
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+      <!-- Custom JavaScript for Products Page -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Flash messages
+            const flashMessage = document.querySelector('.alert');
+            if (flashMessage) {
+                setTimeout(function() {
+                    flashMessage.style.opacity = '0';
+                    setTimeout(function() {
+                        flashMessage.remove();
+                    }, 300);
+                }, 3000);
+            }
+            
+            // Cart buttons loading states
+            const cartForms = document.querySelectorAll('form[action*="/cart/add"]');
+            cartForms.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    const button = this.querySelector('button[type="submit"]');
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '<span class="spinner-border spinner-border-sm me-1" role="status" aria-hidden="true"></span>Adding...';
+                    button.disabled = true;
+                    
+                    // Re-enable button after a delay (in case of error)
+                    setTimeout(function() {
+                        button.innerHTML = originalText;
+                        button.disabled = false;
+                    }, 3000);
+                });
+            });
+            
+            // Quantity input validation
+            const quantityInputs = document.querySelectorAll('.quantity-input');
+            quantityInputs.forEach(input => {
+                input.addEventListener('change', function() {
+                    const min = parseInt(this.min) || 1;
+                    const max = parseInt(this.max) || 999;
+                    const value = parseInt(this.value) || min;
+                    
+                    if (value < min) {
+                        this.value = min;
+                    } else if (value > max) {
+                        this.value = max;
+                        alert('Maximum available quantity is ' + max);
+                    }
+                });
+            });
+            
+            // Product card hover effects
+            const productCards = document.querySelectorAll('.product-card');
+            productCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-5px)';
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                });
+            });
+            
+            // Confirm order for out of stock items
+            const orderButtons = document.querySelectorAll('.btn-order-now');
+            orderButtons.forEach(button => {
+                if (button.classList.contains('disabled')) {
+                    button.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        alert('This product is currently out of stock.');
+                    });
+                }
+            });
+            
+            // Auto-submit filters with debounce
+            let timeout;
+            const locationInput = document.getElementById('locationFilter');
+            if (locationInput) {
+                locationInput.addEventListener('input', function() {
+                    clearTimeout(timeout);
+                    timeout = setTimeout(function() {
+                        document.getElementById('filterForm').submit();
+                    }, 1000); // Wait 1 second after user stops typing
+                });
+            }
+        });
+        
+        // Function to show success message
+        function showSuccessMessage(message) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = 'alert alert-success alert-dismissible fade show position-fixed';
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 1050; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            // Auto remove after 3 seconds
+            setTimeout(function() {
+                alertDiv.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Authentication Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+        }
+        .debug-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        h1 {
+            color: #333;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 10px;
+        }
+        .info-section {
+            margin-bottom: 20px;
+        }
+        .label {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .value {
+            background-color: #eee;
+            padding: 5px;
+            border-radius: 3px;
+        }
+        .actions {
+            margin-top: 30px;
+        }
+        .actions a {
+            display: inline-block;
+            margin-right: 10px;
+            padding: 8px 16px;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>Authentication Debug Information</h1>
+        
+        <div class="info-section">
+            <div>
+                <span class="label">Username:</span>
+                <span class="value" th:text="${username}">username</span>
+            </div>
+            <div>
+                <span class="label">Is Authenticated:</span>
+                <span class="value" th:text="${isAuthenticated}">false</span>
+            </div>
+            <div>
+                <span class="label">Authorities:</span>
+                <span class="value" th:text="${authorities}">[]</span>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <a href="/login">Back to Login</a>
+            <a href="/buyer/">Go to Buyer Dashboard</a>
+            <a href="/home">Go to Home</a>
+        </div>
+    </div>
+</body>
+</html>

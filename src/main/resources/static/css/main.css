@@ -1,0 +1,256 @@
+/* General styling */
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+    overflow-y: auto;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-weight: 400;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 1rem;
+    line-height: 1.58;
+    color: #333;
+    background-color: #f4f4f4;
+}
+
+.hidden {
+    display: none;
+}
+
+.form-control {
+    width: 100%;
+    min-height: 38px;
+    font-size: 15px;
+    border: 1px solid #c8c8c8;
+    padding: 8px;
+    border-radius: 4px;
+}
+
+button {
+    box-shadow: none;
+    border: 1px solid transparent;
+    font-size: 14px;
+    outline: none;
+    line-height: 100%;
+    white-space: nowrap;
+    vertical-align: middle;
+    padding: 0.6rem 1rem;
+    border-radius: 4px;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+    min-height: 38px;
+}
+
+button.accent {
+    background-color: #128C7E;
+    color: #fff;
+    width: 100%;
+}
+
+input {
+    padding: 10px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+h1 {
+    font-size: 1.7em;
+}
+
+a {
+    color: #128C7E;
+}
+
+li {
+    list-style-type: none;
+}
+
+.event-message {
+    text-align: center;
+    color: #777;
+    font-size: 14px;
+    font-style: italic;
+    margin: 10px 0;
+}
+
+.logo-img {
+    height: 30px;
+    width: auto;
+}
+
+.sidebar .logo-img {
+    height: 24px;
+    max-width: 80px;
+    margin-bottom: 8px;
+}
+
+.sidebar-fixed {
+    min-height: 100vh;
+}
+
+/* Order requests table styling */
+.table-order-requests {
+    min-width: 1400px;
+    font-size: 0.95rem;
+}
+
+/* Optimized column widths for better content distribution */
+.table-order-requests th:nth-child(1) { width: 12%; }  /* Order ID */
+.table-order-requests th:nth-child(2) { width: 14%; }  /* Customer */
+.table-order-requests th:nth-child(3) { width: 24%; }  /* Delivery Address - increased for better readability */
+.table-order-requests th:nth-child(4) { width: 22%; }  /* Products - increased for product names */
+.table-order-requests th:nth-child(5) { width: 10%; }  /* Amount */
+.table-order-requests th:nth-child(6) { width: 8%; }   /* Status - reduced */
+.table-order-requests th:nth-child(7) { width: 10%; }  /* Actions - reduced but sufficient */
+
+/* Cell content constraints */
+.table-order-requests td:nth-child(1) { max-width: 150px; }  /* Order ID */
+.table-order-requests td:nth-child(2) { max-width: 170px; }  /* Customer */
+.table-order-requests td:nth-child(3) { max-width: 300px; }  /* Delivery Address - increased */
+.table-order-requests td:nth-child(4) { max-width: 280px; }  /* Products - increased */
+
+.order-id-text {
+    display: block;
+}
+
+.customer-info {
+    min-width: 0;
+}
+
+.customer-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.address-text {
+    display: inline-block;
+    max-width: 250px; /* Increased from 180px for better address visibility */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-text {
+    display: block;
+    max-width: 250px; /* Increased from 180px for better product names visibility */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Enhanced table cells for better content organization */
+.address-cell {
+    padding: 8px 4px;
+}
+
+.product-cell {
+    padding: 8px 4px;
+}
+
+.amount-cell {
+    text-align: center;
+    padding: 8px 4px;
+}
+
+/* Improved action buttons layout */
+.action-buttons {
+    white-space: nowrap;
+    display: flex;
+    justify-content: center;
+    gap: 2px;
+    flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+    margin: 1px;
+    min-width: 32px;
+    padding: 4px 8px;
+}
+
+/* Status badge improvements */
+.status-badge {
+    font-size: 0.75rem;
+    padding: 4px 8px;
+    border-radius: 12px;
+    white-space: nowrap;
+}
+
+/* Person circle icon sizing */
+.person-circle-lg {
+    font-size: 1.5rem;
+}
+
+/* Table responsive enhancements */
+@media (max-width: 1400px) {
+    .table-order-requests {
+        min-width: 1200px;
+        font-size: 0.9rem;
+    }
+    
+    .table-order-requests td:nth-child(3) { max-width: 220px; }
+    .table-order-requests td:nth-child(4) { max-width: 200px; }
+    
+    .address-text {
+        max-width: 200px;
+    }
+    
+    .product-text {
+        max-width: 180px;
+    }
+}
+
+@media (max-width: 1200px) {
+    .table-order-requests {
+        min-width: 1000px;
+        font-size: 0.85rem;
+    }
+    
+    .table-order-requests th:nth-child(3) { width: 22%; }
+    .table-order-requests th:nth-child(4) { width: 20%; }
+    
+    .action-buttons .btn {
+        padding: 2px 6px;
+        min-width: 28px;
+    }
+}
+
+/* Enhanced table header styling */
+.table-order-requests thead th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+    font-weight: 600;
+    font-size: 0.9rem;
+    padding: 12px 8px;
+    vertical-align: middle;
+}
+
+/* Improved table row hover effects */
+.table-order-requests tbody tr:hover {
+    background-color: #f5f5f5;
+    transition: background-color 0.2s ease;
+}
+
+/* Better spacing for table cells */
+.table-order-requests td {
+    padding: 12px 8px;
+    vertical-align: middle;
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Tooltip enhancement for truncated text */
+[data-bs-toggle="tooltip"] {
+    cursor: help;
+}

@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head}">
+    <title>Order History - Buyer Dashboard</title>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+    <div class="container-fluid">
+        <div class="row">
+            <nav th:replace="~{fragments/buyer-sidebar :: buyer-sidebar}"></nav>
+            
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <!-- Order History Header -->
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                    <h1 class="h2"><i class="bi bi-clock-history me-2"></i>Order History</h1>
+                    <div class="input-group search-container" style="max-width: 300px;">
+                        <input type="text" class="form-control" placeholder="Search orders..." aria-label="Search orders">
+                        <button class="btn btn-outline-secondary" type="button">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Order Tabs -->
+                <ul class="nav nav-tabs mb-4" id="orderTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="all-orders-tab" data-bs-toggle="tab" data-bs-target="#all-orders" type="button" role="tab" aria-controls="all-orders" aria-selected="true">
+                            All Orders <span class="badge bg-secondary rounded-pill ms-1">8</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="processing-tab" data-bs-toggle="tab" data-bs-target="#processing" type="button" role="tab" aria-controls="processing" aria-selected="false">
+                            Processing <span class="badge bg-warning text-dark rounded-pill ms-1">3</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="delivered-tab" data-bs-toggle="tab" data-bs-target="#delivered" type="button" role="tab" aria-controls="delivered" aria-selected="false">
+                            Delivered <span class="badge bg-success rounded-pill ms-1">5</span>
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="cancelled-tab" data-bs-toggle="tab" data-bs-target="#cancelled" type="button" role="tab" aria-controls="cancelled" aria-selected="false">
+                            Cancelled <span class="badge bg-danger rounded-pill ms-1">0</span>
+                        </button>
+                    </li>
+                </ul>
+
+                <!-- Order Content -->
+                <div class="tab-content" id="orderTabContent">
+                    <!-- All Orders Tab -->
+                    <div class="tab-pane fade show active" id="all-orders" role="tabpanel" aria-labelledby="all-orders-tab">
+                        <form th:action="@{/buyer/order/all}" method="post" class="d-flex justify-content-end mb-3">
+                            <button type="button" class="btn btn-success btn-lg mb-3 float-end" data-bs-toggle="modal" data-bs-target="#checkoutModal">
+                                <i class="bi bi-bag-check me-2"></i>Order All / Checkout
+                            </button>
+                        </form>
+                        
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th scope="col">Product(s)</th>
+                                                <th scope="col">Quantity</th>
+                                                <th scope="col">Total Price</th>
+                                                <th scope="col">Status</th>
+                                                <th scope="col">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr th:each="order : ${orders}">
+                                                <td>
+                                                    <ul th:if="${order.itemNames != null && order.itemNames.size() > 0}">
+                                                        <li th:each="i : ${#numbers.sequence(0, order.itemNames.size() - 1)}">
+                                                            <span th:text="${order.itemNames[i]}">Product Name</span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td>
+                                                    <ul th:if="${order.quantities != null && order.quantities.size() > 0}">
+                                                        <li th:each="i : ${#numbers.sequence(0, order.quantities.size() - 1)}">
+                                                            <span th:text="${order.quantities[i]}">1</span>
+                                                        </li>
+                                                    </ul>
+                                                </td>
+                                                <td th:text="${order.totalAmount != null ? '₱' + #numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</td>
+                                                <td><span class="badge bg-success" th:text="${order.status}">Status</span></td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#orderModal">View Details</a></li>
+                                                            <li><a class="dropdown-item" href="#">Download Invoice</a></li>
+                                                            <li><a class="dropdown-item" href="#">Leave Review</a></li>
+                                                            <li><a class="dropdown-item" href="#">Reorder</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr th:if="${orders.size()} == 0">
+                                                <td colspan="5" class="text-center">No orders found.</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Pagination -->
+                        <nav aria-label="Order history pagination" class="my-4">
+                            <ul class="pagination justify-content-center">
+                                <li class="page-item disabled">
+                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Previous</a>
+                                </li>
+                                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                                <li class="page-item">
+                                    <a class="page-link" href="#">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                    
+                    <!-- Processing Tab -->
+                    <div class="tab-pane fade" id="processing" role="tabpanel" aria-labelledby="processing-tab">
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th scope="col">Order #</th>
+                                                <th scope="col">Date</th>
+                                                <th scope="col">Farms</th>
+                                                <th scope="col">Items</th>
+                                                <th scope="col">Total</th>
+                                                <th scope="col">Status</th>
+                                                <th scope="col">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Processing Order 1 -->
+                                            <tr>
+                                                <td><a href="#" class="order-link" data-bs-toggle="modal" data-bs-target="#orderModal">#ORD-2025-0006</a></td>
+                                                <td>May 12, 2025</td>
+                                                <td>Green Valley Farm, Herb Haven</td>
+                                                <td>7 items</td>
+                                                <td th:text="${order != null && order.totalAmount != null ? '₱' + #numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</td>
+                                                <td><span class="badge bg-warning text-dark">Processing</span></td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#orderModal">View Details</a></li>
+                                                            <li><a class="dropdown-item" href="#">Track Package</a></li>
+                                                            <li><a class="dropdown-item" href="#">Contact Seller</a></li>
+                                                            <li><a class="dropdown-item" href="#">Cancel Order</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            
+                                            <!-- Processing Order 2 -->
+                                            <tr>
+                                                <td><a href="#" class="order-link" data-bs-toggle="modal" data-bs-target="#orderModal">#ORD-2025-0007</a></td>
+                                                <td>May 11, 2025</td>
+                                                <td>Bee Haven Apiaries</td>
+                                                <td>2 items</td>
+                                                <td th:text="${order != null && order.totalAmount != null ? '₱' + #numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</td>
+                                                <td><span class="badge bg-warning text-dark">Processing</span></td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#orderModal">View Details</a></li>
+                                                            <li><a class="dropdown-item" href="#">Track Package</a></li>
+                                                            <li><a class="dropdown-item" href="#">Contact Seller</a></li>
+                                                            <li><a class="dropdown-item" href="#">Cancel Order</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            
+                                            <!-- Processing Order 3 -->
+                                            <tr>
+                                                <td><a href="#" class="order-link" data-bs-toggle="modal" data-bs-target="#orderModal">#ORD-2025-0008</a></td>
+                                                <td>May 13, 2025</td>
+                                                <td>Alpine Dairy Co-op, Sunny Meadows</td>
+                                                <td>4 items</td>
+                                                <td th:text="${order != null && order.totalAmount != null ? '₱' + #numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</td>
+                                                <td><span class="badge bg-warning text-dark">Processing</span></td>
+                                                <td>
+                                                    <div class="btn-group">
+                                                        <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                                            Actions
+                                                        </button>
+                                                        <ul class="dropdown-menu">
+                                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#orderModal">View Details</a></li>
+                                                            <li><a class="dropdown-item" href="#">Track Package</a></li>
+                                                            <li><a class="dropdown-item" href="#">Contact Seller</a></li>
+                                                            <li><a class="dropdown-item" href="#">Cancel Order</a></li>
+                                                        </ul>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Delivered Tab -->
+                    <div class="tab-pane fade" id="delivered" role="tabpanel" aria-labelledby="delivered-tab">
+                        <div class="card">
+                            <div class="card-body p-0">
+                                <div class="table-responsive">
+                                    <table class="table align-middle mb-0">
+                                        <thead class="table-light">
+                                            <tr>
+                                                <th scope="col">Order #</th>
+                                                <th scope="col">Date</th>
+                                                <th scope="col">Farms</th>
+                                                <th scope="col">Items</th>
+                                                <th scope="col">Total</th>
+                                                <th scope="col">Status</th>
+                                                <th scope="col">Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            <!-- Only show delivered orders in this tab -->
+                                            <!-- Similar structure to previous tables -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Cancelled Tab -->
+                    <div class="tab-pane fade" id="cancelled" role="tabpanel" aria-labelledby="cancelled-tab">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="text-center py-5">
+                                    <i class="bi bi-x-circle text-muted" style="font-size: 3rem;"></i>
+                                    <h4 class="mt-3">No Cancelled Orders</h4>
+                                    <p class="text-muted">You don't have any cancelled orders at the moment.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Order Detail Modal -->
+    <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="orderModalLabel">Order #ORD-2025-0001</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-calendar me-2"></i>Order Date</h6>
+                            <p>May 10, 2025 at 10:23 AM</p>
+                            
+                            <h6><i class="bi bi-geo-alt me-2"></i>Delivery Address</h6>
+                            <p>123 Main Street<br>Apt 4B<br>Farmington, CA 12345</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-truck me-2"></i>Delivery Status</h6>
+                            <p><span class="badge bg-success">Delivered</span> on May 12, 2025</p>
+                            
+                            <h6><i class="bi bi-credit-card me-2"></i>Payment Method</h6>
+                            <p>Visa ending in 4242</p>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mb-3">Order Items</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Farm</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Farm Fresh Tomatoes</td>
+                                    <td>Green Valley Farm</td>
+                                    <td>2 kg</td>
+                                    <td>$4.99/kg</td>
+                                    <td>$9.98</td>
+                                </tr>
+                                <tr>
+                                    <td>Artisan Goat Cheese</td>
+                                    <td>Alpine Dairy Co-op</td>
+                                    <td>1 block</td>
+                                    <td>$8.99/block</td>
+                                    <td>$8.99</td>
+                                </tr>
+                                <tr>
+                                    <td>Organic Kale Bunches</td>
+                                    <td>Green Valley Farm</td>
+                                    <td>2 bunches</td>
+                                    <td>$3.25/bunch</td>
+                                    <td>$6.50</td>
+                                </tr>
+                                <tr>
+                                    <td>Free Range Eggs</td>
+                                    <td>Sunny Meadows</td>
+                                    <td>1 dozen</td>
+                                    <td>$6.50/dozen</td>
+                                    <td>$6.50</td>
+                                </tr>
+                                <tr>
+                                    <td>Fresh Basil</td>
+                                    <td>Green Valley Farm</td>
+                                    <td>1 bunch</td>
+                                    <td>$2.99/bunch</td>
+                                    <td>$2.99</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="4" class="text-end fw-bold">Subtotal:</td>
+                                    <td>$34.96</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="text-end fw-bold">Shipping:</td>
+                                    <td>$5.00</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="text-end fw-bold">Tax:</td>
+                                    <td>$2.79</td>
+                                </tr>
+                                <tr>
+                                    <td colspan="4" class="text-end fw-bold">Total:</td>
+                                    <td class="fw-bold">$42.75</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    
+                    <hr>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-truck me-2"></i>Delivery Updates</h6>
+                            <ul class="list-group">
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">Delivered</div>
+                                        Package delivered to recipient
+                                    </div>
+                                    <small class="text-muted">May 12, 9:45 AM</small>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">Out for Delivery</div>
+                                        Package is out for delivery
+                                    </div>
+                                    <small class="text-muted">May 12, 7:30 AM</small>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">Shipped</div>
+                                        Package has left the farm
+                                    </div>
+                                    <small class="text-muted">May 11, 3:15 PM</small>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">Processing</div>
+                                        Order is being prepared
+                                    </div>
+                                    <small class="text-muted">May 10, 11:20 AM</small>
+                                </li>
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">Order Placed</div>
+                                        Order confirmed
+                                    </div>
+                                    <small class="text-muted">May 10, 10:23 AM</small>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="bi bi-chat-dots me-2"></i>Contact Farmers</h6>
+                            <div class="list-group">
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <h6 class="mb-1">Green Valley Farm</h6>
+                                        <small class="text-primary">Chat</small>
+                                    </div>
+                                    <small class="text-muted">3 items from this farm</small>
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <h6 class="mb-1">Alpine Dairy Co-op</h6>
+                                        <small class="text-primary">Chat</small>
+                                    </div>
+                                    <small class="text-muted">1 item from this farm</small>
+                                </a>
+                                <a href="#" class="list-group-item list-group-item-action">
+                                    <div class="d-flex w-100 justify-content-between align-items-center">
+                                        <h6 class="mb-1">Sunny Meadows</h6>
+                                        <small class="text-primary">Chat</small>
+                                    </div>
+                                    <small class="text-muted">1 item from this farm</small>
+                                </a>
+                            </div>
+                            
+                            <h6 class="mt-4"><i class="bi bi-star me-2"></i>Leave a Review</h6>
+                            <div class="card">
+                                <div class="card-body">
+                                    <p class="card-text">How was your experience with this order?</p>
+                                    <div class="rating mb-3">
+                                        <i class="bi bi-star fs-4 me-1 rating-star"></i>
+                                        <i class="bi bi-star fs-4 me-1 rating-star"></i>
+                                        <i class="bi bi-star fs-4 me-1 rating-star"></i>
+                                        <i class="bi bi-star fs-4 me-1 rating-star"></i>
+                                        <i class="bi bi-star fs-4 me-1 rating-star"></i>
+                                    </div>
+                                    <div class="mb-3">
+                                        <textarea class="form-control" rows="3" placeholder="Share your thoughts about this order..."></textarea>
+                                    </div>
+                                    <button class="btn btn-sm btn-primary">Submit Review</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary"><i class="bi bi-arrow-repeat me-1"></i>Reorder</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order All / Checkout Modal Trigger -->
+    <div class="d-flex justify-content-end mb-3">
+        <button type="button" class="btn btn-success btn-lg" data-bs-toggle="modal" data-bs-target="#checkoutModal">
+            <i class="bi bi-bag-check me-2"></i>Order All / Checkout
+        </button>
+    </div>
+
+    <!-- Checkout Modal -->
+    <div class="modal fade" id="checkoutModal" tabindex="-1" aria-labelledby="checkoutModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <form th:action="@{/buyer/order/all}" method="post">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="checkoutModalLabel">Checkout</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="deliveryOption" class="form-label">Delivery Option</label>
+                            <select class="form-select" id="deliveryOption" name="deliveryOption" required>
+                                <option value="delivery">Deliver to my address</option>
+                                <option value="pickup">Pick up at farm</option>
+                            </select>
+                        </div>
+                        <div class="mb-3" id="addressField">
+                            <label for="deliveryAddress" class="form-label">Delivery Address</label>
+                            <input type="text" class="form-control" id="deliveryAddress" name="deliveryAddress" placeholder="Enter your address" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="paymentMethod" class="form-label">Payment Method</label>
+                            <select class="form-select" id="paymentMethod" name="paymentMethod" required>
+                                <option value="cod">Cash on Delivery</option>
+                                <option value="card">Credit/Debit Card</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">Place Order</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Show/hide address field based on delivery option
+        const deliveryOption = document.getElementById('deliveryOption');
+        const addressField = document.getElementById('addressField');
+        if (deliveryOption && addressField) {
+            deliveryOption.addEventListener('change', function() {
+                if (this.value === 'pickup') {
+                    addressField.style.display = 'none';
+                } else {
+                    addressField.style.display = '';
+                }
+            });
+        }
+    </script>
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+    
+    <!-- Custom JavaScript for Order History -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Star rating functionality
+            const ratingStars = document.querySelectorAll('.rating-star');
+            ratingStars.forEach((star, index) => {
+                star.addEventListener('click', function() {
+                    // Reset all stars
+                    ratingStars.forEach(s => s.classList.remove('bi-star-fill', 'text-warning'));
+                    
+                    // Fill clicked star and all before it
+                    for (let i = 0; i <= index; i++) {
+                        ratingStars[i].classList.remove('bi-star');
+                        ratingStars[i].classList.add('bi-star-fill', 'text-warning');
+                    }
+                });
+            });
+            
+            // Order modal dynamic content
+            const orderLinks = document.querySelectorAll('.order-link');
+            orderLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    // In a real app, this would fetch the order details and update the modal
+                    const orderId = this.textContent;
+                    document.getElementById('orderModalLabel').textContent = orderId;
+                });
+            });
+            
+            // Search functionality
+            const searchInput = document.querySelector('.search-container input');
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    // In a real app, this would filter the orders based on the search query
+                    console.log('Searching for:', this.value);
+                }
+            });
+        });
+    </script>
+</body>
+</html>

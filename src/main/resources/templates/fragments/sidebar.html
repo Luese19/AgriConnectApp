@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>    <nav id="sidebarMenu" class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse" th:fragment="sidebar">
+        <div class="position-sticky pt-3">
+            <div class="farm-info mb-4 text-center">
+                <img src="img/agriculture.png" class="img-fluid rounded-circle mb-2" alt="agriculture.png">
+                <h6 class="mb-0">AGRICONNECT</h6>
+                <small class="text-muted">Est. 2025</small>
+            </div>           
+             <ul class="nav flex-column">
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${pageTitle} == 'Dashboard' ? 'active'" href="/farmer/dashboard" title="Dashboard home">
+                        <i class="bi bi-house-door me-2"></i>
+                        Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${pageTitle} == 'Inventory Management' ? 'active'" href="/farmer/inventory" title="View and manage inventory">
+                        <i class="bi bi-box me-2"></i>
+                        Inventory
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#orders" title="View and manage orders">
+                        <i class="bi bi-cart me-2"></i>
+                        Orders
+                        <span class="badge rounded-pill bg-warning text-dark float-end">8</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/chat" title="Communication center">
+                        <i class="bi bi-chat me-2"></i>
+                        Messages
+                        <span class="badge rounded-pill bg-danger float-end">3</span>
+                    </a>
+                </li>
+            </ul>
+            
+            <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+                <span>Quick Actions</span>
+                <a class="link-secondary" href="#" aria-label="Add new action" title="Add new action">
+                    <i class="bi bi-plus-circle"></i>
+                </a>
+            </h6>
+            <ul class="nav flex-column mb-2">
+                <li class="nav-item">
+                    <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#addCropModal" title="Add a new crop">
+                        <i class="bi bi-plus-circle me-2"></i>
+                        Add New Crop
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" title="Update your pricing">
+                        <i class="bi bi-tag me-2"></i>
+                        Update Pricing
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" title="Generate sales report">
+                        <i class="bi bi-file-earmark-text me-2"></i>
+                        Generate Report
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" title="Check market prices">
+                        <i class="bi bi-currency-dollar me-2"></i>
+                        Market Prices
+                    </a>
+                </li>
+            </ul>
+            
+            <div class="weather-widget mt-4 p-3 bg-light rounded">
+                <h6 class="mb-2"><i class="bi bi-cloud-sun me-2"></i>Farm Weather</h6>
+                <div class="d-flex align-items-center">
+                    <i class="bi bi-sun text-warning" style="font-size: 2rem;"></i>
+                    <div class="ms-3">
+                        <h4 class="mb-0">72°F</h4>
+                        <small>Sunny, perfect growing conditions</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+</body>
+</html>
