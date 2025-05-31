@@ -1,7 +1,6 @@
 package org.scitechdev.finalPorject.Entity;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,11 +10,17 @@ public class Order {
     private List<String> productIds;
     private List<Object> quantities;
     private List<String> itemNames;
-    private double totalAmount;
-    private String status;    private String deliveryOption;
-    private String paymentMethod;
-    private String deliveryAddress;
-    private String orderDate; // Stored as ISO string for Firestore compatibility
+    private double totalAmount;    private String status;
+    private String deliveryOption;
+    private String paymentMethod;    private String deliveryAddress;
+    private String orderDate; // Store as ISO formatted string
+    private String acceptedDate; // When farmer accepts the order
+    private String deliveredDate; // When order is marked as delivered
+    private String farmerNotes; // Notes from farmer to buyer
+    private String buyerNotes; // Notes from buyer to farmer
+    private String estimatedDeliveryTime; // Estimated delivery time set by farmer
+    private double shippingCost; // Shipping cost
+    private String orderPriority; // normal, urgent, express
 
     public Order() {}
 
@@ -26,7 +31,7 @@ public class Order {
         this.quantities = quantities;
         this.totalAmount = totalAmount;
         this.status = status;
-        this.orderDate = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        this.orderDate = java.time.LocalDateTime.now().toString();
     }
 
     public String getOrderId() {
@@ -110,21 +115,74 @@ public class Order {
     }
 
     public void setDeliveryAddress(String deliveryAddress) {
-        this.deliveryAddress = deliveryAddress;
-    }    public LocalDateTime getOrderDate() {
-        return orderDate != null ? LocalDateTime.parse(orderDate, DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
-    }
-
-    public void setOrderDate(LocalDateTime orderDate) {
-        this.orderDate = orderDate != null ? orderDate.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME) : null;
-    }
-    
-    // Additional convenience methods for direct string access
-    public String getOrderDateString() {
+        this.deliveryAddress = deliveryAddress;    }    // Simple string-based date methods
+    public String getOrderDate() {
         return orderDate;
     }
-    
-    public void setOrderDateString(String orderDate) {
+
+    public void setOrderDate(String orderDate) {
         this.orderDate = orderDate;
     }
+
+    // Convenience method to get LocalDateTime for business logic
+    private LocalDateTime getOrderDateTime() {
+        return orderDate != null ? LocalDateTime.parse(orderDate) : null;
+    }
+    
+    private void setOrderDateTime(LocalDateTime orderDate) {
+        this.orderDate = orderDate != null ? orderDate.toString() : null;
+    }
+
+    public String getAcceptedDate() {
+        return acceptedDate;
+    }
+
+    public void setAcceptedDate(String acceptedDate) {
+        this.acceptedDate = acceptedDate;
+    }
+
+    public String getDeliveredDate() {
+        return deliveredDate;
+    }    public void setDeliveredDate(String deliveredDate) {
+        this.deliveredDate = deliveredDate;
+    }
+
+    public String getFarmerNotes() {
+        return farmerNotes;
+    }
+
+    public void setFarmerNotes(String farmerNotes) {
+        this.farmerNotes = farmerNotes;
+    }
+
+    public String getBuyerNotes() {
+        return buyerNotes;
+    }
+
+    public void setBuyerNotes(String buyerNotes) {
+        this.buyerNotes = buyerNotes;
+    }
+
+    public String getEstimatedDeliveryTime() {
+        return estimatedDeliveryTime;
+    }
+
+    public void setEstimatedDeliveryTime(String estimatedDeliveryTime) {
+        this.estimatedDeliveryTime = estimatedDeliveryTime;
+    }
+
+    public double getShippingCost() {
+        return shippingCost;
+    }
+
+    public void setShippingCost(double shippingCost) {
+        this.shippingCost = shippingCost;
+    }
+
+    public String getOrderPriority() {
+        return orderPriority;
+    }
+
+    public void setOrderPriority(String orderPriority) {
+        this.orderPriority = orderPriority;    }
 }

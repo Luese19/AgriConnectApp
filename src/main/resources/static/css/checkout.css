@@ -1,3 +1,74 @@
+/* Checkout page specific styles */
+
+/* Critical header fix - ensure navbar doesn't cover content */
+.navbar {
+    height: 48px !important;
+    min-height: 48px !important;
+    max-height: 48px !important;
+    padding-top: 0.2rem !important;
+    padding-bottom: 0.2rem !important;
+}
+
+.navbar-brand {
+    font-size: 1rem !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.navbar-brand img {
+    height: 24px !important;
+    max-height: 24px !important;
+}
+
+.navbar-nav .nav-link {
+    padding-top: 0.3rem !important;
+    padding-bottom: 0.3rem !important;
+    font-size: 0.9rem !important;
+}
+
+/* Add extra top margin to ensure content doesn't get covered by header */
+body {
+    padding-top: 48px !important;
+}
+
+.container {
+    margin-top: 15px !important;
+    padding-top: 15px !important;
+}
+
+/* Override any conflicting main selectors from dashboard.css */
+main {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    height: auto !important;
+    min-height: unset !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    position: static !important;
+}
+
+/* Override any sidebar positioning that might affect layout */
+.sidebar {
+    display: none !important;
+}
+
+/* Reset any bootstrap container overrides */
+.container-fluid {
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    flex: none !important;
+}
+
+/* Ensure the checkout form content is properly spaced */
+.checkout-content {
+    margin-top: 1rem;
+}
+
 .quantity-input {
     width: 80px;
+}
+
+#priorityFeeRow {
+    display: none;
 }

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Header Test - Checkout Page</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="/css/checkout.css" rel="stylesheet">
+    <style>
+        /* Test styles to visualize the header issue */
+        .test-content {
+            background-color: #ffeb3b;
+            padding: 20px;
+            margin: 10px 0;
+            border: 2px solid #f57c00;
+        }
+        
+        .header-info {
+            background-color: #e3f2fd;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #2196f3;
+            font-family: monospace;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body class="checkout-page">
+    <!-- Header simulation -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-success fixed-top">
+        <div class="container-fluid">
+            <a class="navbar-brand d-flex align-items-center" href="#">
+                <img src="/img/agriculture.png" alt="AgriConnect Logo" class="logo-img me-2">
+                <span>AgriConnect</span>
+            </a>
+            <div class="navbar-nav ms-auto">
+                <span class="nav-link">Test Header</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        <div class="header-info">
+            Header Height Test:<br>
+            - Expected navbar height: 48px (checkout page)<br>
+            - Body padding-top: 48px<br>
+            - Container margin-top: 15px<br>
+            - Container padding-top: 15px
+        </div>
+        
+        <div class="test-content">
+            <h2><i class="bi bi-bag-check me-2"></i>Checkout Page Header Test</h2>
+            <p>This content should be visible and not covered by the header.</p>
+            <p>If you can see this yellow box completely, the header fix is working!</p>
+        </div>
+        
+        <div class="test-content">
+            <h3>Content Test 2</h3>
+            <p>More content to test spacing and layout.</p>
+            <p>This should also be fully visible without any overlap from the header.</p>
+        </div>
+        
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <h5 class="mb-0">Test Card</h5>
+            </div>
+            <div class="card-body">
+                <p>This card should be properly positioned below the header.</p>
+                <button class="btn btn-primary">Test Button</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Display actual header measurements
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbar = document.querySelector('.navbar');
+            const body = document.body;
+            const container = document.querySelector('.container');
+            
+            const info = document.querySelector('.header-info');
+            info.innerHTML += `<br><br>Actual Measurements:<br>`;
+            info.innerHTML += `- Navbar height: ${navbar.offsetHeight}px<br>`;
+            info.innerHTML += `- Body padding-top: ${getComputedStyle(body).paddingTop}<br>`;
+            info.innerHTML += `- Container margin-top: ${getComputedStyle(container).marginTop}<br>`;
+            info.innerHTML += `- Container padding-top: ${getComputedStyle(container).paddingTop}`;
+        });
+    </script>
+</body>
+</html>

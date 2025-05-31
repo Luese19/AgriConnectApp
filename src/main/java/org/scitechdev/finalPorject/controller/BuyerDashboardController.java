@@ -1,7 +1,6 @@
 package org.scitechdev.finalPorject.controller;
 
-import java.time.LocalDateTime;
-import java.util.Collections;
+import java.util.Arrays;
 import org.scitechdev.finalPorject.service.InventoryItemService;
 import org.scitechdev.finalPorject.service.CartItemService;
 import org.scitechdev.finalPorject.service.OrderService;
@@ -19,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -240,13 +238,10 @@ public class BuyerDashboardController {
         InventoryItem product = inventoryItemService.getItemById(productId);
         double totalAmount = 0.0;        if (product != null) {
             try { totalAmount = Double.parseDouble(product.getItemPrice()); } catch (Exception e) { }
-        }
-        Order order = new Order();
-        order.setBuyerId(buyerId);
-        order.setProductIds(Collections.singletonList(productId));
-        order.setTotalAmount(totalAmount);
-        order.setStatus("Placed");
-        order.setOrderDate(LocalDateTime.now());
+        }        Order order = new Order();        order.setBuyerId(buyerId);        order.setProductIds(Arrays.asList(productId));
+        order.setTotalAmount(totalAmount);        order.setStatus("Pending");
+        order.setOrderDate(java.time.LocalDateTime.now().toString());
+        order.setOrderPriority("normal");
         orderService.saveOrder(order);
         redirectAttributes.addFlashAttribute("message", "Order placed successfully!");
         return "redirect:/buyer/products";
@@ -269,13 +264,12 @@ public class BuyerDashboardController {
         cartItemService.deleteCartItem(cartItemId);
         redirectAttributes.addFlashAttribute("message", "Item removed from cart.");
         return "redirect:/buyer/cart";
-    }
-
-    @PostMapping("/order/all")
+    }    @PostMapping("/order/all")
     public String orderAllCartItems(
             @RequestParam(value = "deliveryOption", required = false) String deliveryOption,
             @RequestParam(value = "deliveryAddress", required = false) String deliveryAddress,
             @RequestParam(value = "paymentMethod", required = false) String paymentMethod,
+            @RequestParam(value = "orderPriority", defaultValue = "normal") String orderPriority,
             RedirectAttributes redirectAttributes) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String buyerId = auth.getName();
@@ -289,15 +283,29 @@ public class BuyerDashboardController {
         for (CartItem cartItem : cartItems) {
             InventoryItem product = inventoryItemService.getItemById(cartItem.getProductId());
             if (product != null) {
-                try { totalAmount += Double.parseDouble(product.getItemPrice()) * cartItem.getQuantity(); } catch (Exception e) { }
-                productIds.add(cartItem.getProductId());
+                try { totalAmount += Double.parseDouble(product.getItemPrice()) * cartItem.getQuantity(); } catch (Exception e) { }                productIds.add(cartItem.getProductId());
             }
-        }        Order order = new Order();
-        order.setBuyerId(buyerId);
-        order.setProductIds(productIds);
-        order.setTotalAmount(totalAmount);
-        order.setStatus("Placed");
-        order.setOrderDate(LocalDateTime.now());
+        }        
+        
+        // Add priority fee to total amount
+        double priorityFee = 0.0;
+        switch (orderPriority) {
+            case "urgent":
+                priorityFee = 15.0;
+                break;
+            case "express":
+                priorityFee = 25.0;
+                break;
+            default:
+                priorityFee = 0.0;
+                break;
+        }
+        totalAmount += priorityFee;
+        
+        Order order = new Order();
+        order.setBuyerId(buyerId);        order.setProductIds(productIds);
+        order.setTotalAmount(totalAmount);        order.setStatus("Pending");        order.setOrderDate(java.time.LocalDateTime.now().toString());
+        order.setOrderPriority(orderPriority);
         // Save delivery and payment info if your Order entity supports it
         if (deliveryOption != null) order.setDeliveryOption(deliveryOption);
         if (deliveryAddress != null && !deliveryAddress.isBlank()) order.setDeliveryAddress(deliveryAddress);
@@ -365,9 +373,7 @@ public class BuyerDashboardController {
             model.addAttribute("total", total);
         }
         return "buyer/checkout";
-    }
-
-    @PostMapping("/checkout/submit")
+    }    @PostMapping("/checkout/submit")
     public String submitCheckout(
             @RequestParam(value = "productId", required = false) String productId,
             @RequestParam(value = "quantity", required = false) Integer quantity,
@@ -376,6 +382,7 @@ public class BuyerDashboardController {
             @RequestParam("deliveryOption") String deliveryOption,
             @RequestParam(value = "deliveryAddress", required = false) String deliveryAddress,
             @RequestParam("paymentMethod") String paymentMethod,
+            @RequestParam(value = "orderPriority", defaultValue = "normal") String orderPriority,
             RedirectAttributes redirectAttributes) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String buyerId = auth.getName();
@@ -401,19 +408,34 @@ public class BuyerDashboardController {
                     if (product != null) {
                         try { totalAmount += Double.parseDouble(product.getItemPrice()) * cartItem.getQuantity(); } catch (Exception e) { }
                         productIds.add(cartItem.getProductId());
-                    }
-                }
+                    }                }
             }
             // Clear the cart
             for (String cartItemId : cartItemIds) {
                 cartItemService.deleteCartItem(cartItemId);
             }
-        }        Order order = new Order();
-        order.setBuyerId(buyerId);
-        order.setProductIds(productIds);
-        order.setTotalAmount(totalAmount);
-        order.setStatus("Placed");
-        order.setOrderDate(LocalDateTime.now());
+        }        
+        
+        // Add priority fee to total amount
+        double priorityFee = 0.0;
+        switch (orderPriority) {
+            case "urgent":
+                priorityFee = 15.0;
+                break;
+            case "express":
+                priorityFee = 25.0;
+                break;
+            default:
+                priorityFee = 0.0;
+                break;
+        }
+        totalAmount += priorityFee;
+        
+        Order order = new Order();
+        order.setBuyerId(buyerId);        order.setProductIds(productIds);
+        order.setTotalAmount(totalAmount);        order.setStatus("Pending");
+        order.setOrderDate(java.time.LocalDateTime.now().toString());
+        order.setOrderPriority(orderPriority);
         order.setDeliveryOption(deliveryOption);
         order.setPaymentMethod(paymentMethod);
         if (deliveryAddress != null && !deliveryAddress.isBlank()) {

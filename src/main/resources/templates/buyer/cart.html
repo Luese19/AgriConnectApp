@@ -311,13 +311,26 @@
                         <div class="mb-3" id="addressField">
                             <label for="deliveryAddress" class="form-label">Delivery Address</label>
                             <input type="text" class="form-control" id="deliveryAddress" name="deliveryAddress" placeholder="Enter your address" required>
-                        </div>
-                        <div class="mb-3">
+                        </div>                        <div class="mb-3">
                             <label for="paymentMethod" class="form-label">Payment Method</label>
                             <select class="form-select" id="paymentMethod" name="paymentMethod" required>
                                 <option value="cod">Cash on Delivery</option>
                                 <option value="card">Credit/Debit Card</option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="orderPriority" class="form-label">Order Priority</label>
+                            <select class="form-select" id="orderPriority" name="orderPriority" required>
+                                <option value="normal" selected>Normal (Standard Processing)</option>
+                                <option value="urgent">Urgent (+₱15.00 - Priority Handling)</option>
+                                <option value="express">Express (+₱25.00 - Expedited Processing)</option>
+                            </select>
+                            <div class="form-text">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Higher priority orders receive faster processing and handling by farmers.
+                                </small>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -395,8 +408,7 @@
                 window.location.href = '/buyer/products';
             });
         });
-        
-        // Show/hide address field based on delivery option
+          // Show/hide address field based on delivery option
         const deliveryOption = document.getElementById('deliveryOption');
         const addressField = document.getElementById('addressField');
         if (deliveryOption && addressField) {
@@ -406,6 +418,42 @@
                 } else {
                     addressField.style.display = '';
                 }
+            });
+        }
+
+        // Handle order priority changes for checkout modal
+        const orderPriority = document.getElementById('orderPriority');
+        if (orderPriority) {
+            orderPriority.addEventListener('change', function() {
+                let priorityFee = 0;
+                let priorityText = '';
+                
+                switch(this.value) {
+                    case 'urgent':
+                        priorityFee = 15.00;
+                        priorityText = ' (Priority Fee: +₱15.00)';
+                        break;
+                    case 'express':
+                        priorityFee = 25.00;
+                        priorityText = ' (Priority Fee: +₱25.00)';
+                        break;
+                    default:
+                        priorityFee = 0;
+                        priorityText = '';
+                        break;
+                }
+                
+                // Update the option text to show fee
+                const options = this.querySelectorAll('option');
+                options.forEach(option => {
+                    if (option.value === 'normal') {
+                        option.textContent = 'Normal (Standard Processing)';
+                    } else if (option.value === 'urgent') {
+                        option.textContent = 'Urgent (+₱15.00 - Priority Handling)';
+                    } else if (option.value === 'express') {
+                        option.textContent = 'Express (+₱25.00 - Expedited Processing)';
+                    }
+                });
             });
         }
     </script>

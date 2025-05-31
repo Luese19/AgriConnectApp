@@ -1,0 +1,165 @@
+/* Settings Page Styles */
+
+/* Header fixes for profile/settings pages */
+body.profile-page {
+    padding-top: 56px !important;
+}
+
+/* Override any conflicting main selectors from dashboard.css */
+body.profile-page main {
+    padding-top: 0 !important;
+    margin-top: 0 !important;
+    height: auto !important;
+    min-height: unset !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    position: static !important;
+}
+
+.settings-container {
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+    max-width: 1200px;
+    margin: 1rem auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+/* Navigation Styles */
+.settings-nav {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.settings-nav .nav-link {
+    color: #666;
+    border-radius: 0;
+    border: none;
+    padding: 1rem 1.5rem;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.settings-nav .nav-link.active {
+    background: #28a745;
+    color: white;
+}
+
+.settings-nav .nav-link:hover {
+    background-color: rgba(40, 167, 69, 0.1);
+    color: #28a745;
+    transform: translateX(5px);
+}
+
+/* Card Styles */
+.settings-card {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    transition: box-shadow 0.3s ease;
+}
+
+.settings-card:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+/* Form Styles */
+.form-switch .form-check-input {
+    width: 3rem;
+    height: 1.5rem;
+}
+
+.form-check-input:checked {
+    background-color: #28a745;
+    border-color: #28a745;
+}
+
+/* Button Styles */
+.btn-success {
+    background-color: #28a745;
+    border-color: #28a745;
+    transition: all 0.3s ease;
+}
+
+.btn-success:hover {
+    background-color: #218838;
+    border-color: #1e7e34;
+    transform: translateY(-2px);
+}
+
+/* Alert Styles */
+.alert-custom {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1050;
+    min-width: 300px;
+}
+
+/* Password Strength Indicator */
+.password-strength {
+    height: 4px;
+    border-radius: 2px;
+    margin-top: 5px;
+    transition: all 0.3s ease;
+}
+
+.strength-weak { 
+    background-color: #dc3545; 
+}
+
+.strength-medium { 
+    background-color: #ffc107; 
+}
+
+.strength-strong { 
+    background-color: #28a745; 
+}
+
+@media (max-width: 768px) {
+    .settings-container {
+        padding: 1rem 0.5rem;
+    }
+    
+    .settings-nav {
+        margin-bottom: 1rem;
+    }
+    
+    .settings-nav .nav-link {
+        text-align: center;
+    }
+}
+
+/* Dark theme styles (when implemented) */
+.dark-theme .settings-container {
+    background-color: #1a1a1a;
+    color: #ffffff;
+}
+
+.dark-theme .settings-card {
+    background-color: #2d2d2d;
+    color: #ffffff;
+}
+
+.dark-theme .settings-nav {
+    background-color: #2d2d2d;
+}
+
+.dark-theme .form-control {
+    background-color: #3d3d3d;
+    border-color: #5d5d5d;
+    color: #ffffff;
+}
+
+.dark-theme .form-select {
+    background-color: #3d3d3d;
+    border-color: #5d5d5d;
+    color: #ffffff;
+}

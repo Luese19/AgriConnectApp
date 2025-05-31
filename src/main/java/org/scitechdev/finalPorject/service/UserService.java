@@ -3,6 +3,7 @@ package org.scitechdev.finalPorject.service;
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.*;
 import com.google.firebase.cloud.FirestoreClient;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -13,6 +14,8 @@ import java.util.concurrent.ExecutionException;
 
 @Service
 public class UserService {
+    
+    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     
     public Map<String, Object> getUserDetails(String userId) {
         try {
@@ -150,5 +153,105 @@ public class UserService {
             return (String) userData.get("username");
         }
         return "Unknown User";
+    }
+
+    public boolean validatePassword(String userId, String currentPassword) {
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            
+            // Get user's stored password hash
+            DocumentSnapshot userDoc = db.collection("users").document(userId).get().get();
+            if (userDoc.exists()) {
+                Map<String, Object> userData = userDoc.getData();
+                if (userData != null) {
+                    String storedPasswordHash = (String) userData.get("password");
+                    return passwordEncoder.matches(currentPassword, storedPasswordHash);
+                }
+            }
+            
+            // Try farmers collection
+            ApiFuture<QuerySnapshot> farmerFuture = db.collection("farmers")
+                    .whereEqualTo("farmerId", userId)
+                    .get();
+            
+            QuerySnapshot farmerSnapshot = farmerFuture.get();
+            if (!farmerSnapshot.isEmpty()) {
+                Map<String, Object> farmerData = farmerSnapshot.getDocuments().get(0).getData();
+                if (farmerData != null) {
+                    String storedPasswordHash = (String) farmerData.get("farmerPassword");
+                    return passwordEncoder.matches(currentPassword, storedPasswordHash);
+                }
+            }
+            
+            // Try suppliers collection
+            ApiFuture<QuerySnapshot> buyerFuture = db.collection("suppliers")
+                    .whereEqualTo("supplierId", userId)
+                    .get();
+            
+            QuerySnapshot buyerSnapshot = buyerFuture.get();
+            if (!buyerSnapshot.isEmpty()) {
+                Map<String, Object> buyerData = buyerSnapshot.getDocuments().get(0).getData();
+                if (buyerData != null) {
+                    String storedPasswordHash = (String) buyerData.get("supplierPassword");
+                    return passwordEncoder.matches(currentPassword, storedPasswordHash);
+                }
+            }
+            
+            return false;
+            
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
+    public boolean updatePassword(String userId, String newPassword) {
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            String hashedPassword = passwordEncoder.encode(newPassword);
+            
+            // Try users collection first
+            DocumentSnapshot userDoc = db.collection("users").document(userId).get().get();
+            if (userDoc.exists()) {
+                Map<String, Object> updateData = new HashMap<>();
+                updateData.put("password", hashedPassword);
+                db.collection("users").document(userId).update(updateData).get();
+                return true;
+            }
+            
+            // Try farmers collection
+            ApiFuture<QuerySnapshot> farmerFuture = db.collection("farmers")
+                    .whereEqualTo("farmerId", userId)
+                    .get();
+            
+            QuerySnapshot farmerSnapshot = farmerFuture.get();
+            if (!farmerSnapshot.isEmpty()) {
+                String docId = farmerSnapshot.getDocuments().get(0).getId();
+                Map<String, Object> updateData = new HashMap<>();
+                updateData.put("farmerPassword", hashedPassword);
+                db.collection("farmers").document(docId).update(updateData).get();
+                return true;
+            }
+            
+            // Try suppliers collection
+            ApiFuture<QuerySnapshot> buyerFuture = db.collection("suppliers")
+                    .whereEqualTo("supplierId", userId)
+                    .get();
+            
+            QuerySnapshot buyerSnapshot = buyerFuture.get();
+            if (!buyerSnapshot.isEmpty()) {
+                String docId = buyerSnapshot.getDocuments().get(0).getId();
+                Map<String, Object> updateData = new HashMap<>();
+                updateData.put("supplierPassword", hashedPassword);
+                db.collection("suppliers").document(docId).update(updateData).get();
+                return true;
+            }
+            
+            return false;
+            
+        } catch (InterruptedException | ExecutionException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

@@ -16,6 +16,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -34,13 +35,27 @@ public class ChatController {
     @Autowired
     private SimpMessageSendingOperations messagingTemplate;
 
+    // Helper method to get current user from session
+    private String getCurrentUserId(HttpSession session) {
+        return (String) session.getAttribute("userId");
+    }
+
+    private String getCurrentUserRole(HttpSession session) {
+        return (String) session.getAttribute("userRole");
+    }
+
     // WebSocket message handling
     @MessageMapping("/chat.sendMessage")
     public void sendMessage(ChatMessage chatMessage) {
         try {
-            // Get current user info
+            // Get current user info from Security Context (for WebSocket)
             Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String currentUserId = auth.getName();
+            String currentUserId = auth != null ? auth.getName() : null;
+            
+            if (currentUserId == null) {
+                return;
+            }
+            
             Map<String, Object> userData = userService.getUserDetails(currentUserId);
             
             if (userData == null) {
@@ -108,19 +123,16 @@ public class ChatController {
     // REST API endpoints
     @GetMapping("/api/chat/conversations")
     @ResponseBody
-    public ResponseEntity<List<ChatConversation>> getConversations() {
+    public ResponseEntity<List<ChatConversation>> getConversations(HttpSession session) {
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String currentUserId = auth.getName();
-            Map<String, Object> userData = userService.getUserDetails(currentUserId);
+            String currentUserId = getCurrentUserId(session);
+            String userRole = getCurrentUserRole(session);
             
-            if (userData == null) {
-                return ResponseEntity.badRequest().build();
+            if (currentUserId == null || userRole == null) {
+                return ResponseEntity.status(401).build(); // Unauthorized
             }
 
-            String userRole = (String) userData.get("role");
             List<ChatConversation> conversations = chatService.getConversationsByUserId(currentUserId, userRole);
-            
             return ResponseEntity.ok(conversations);
 
         } catch (Exception e) {
@@ -133,8 +145,15 @@ public class ChatController {
     @ResponseBody
     public ResponseEntity<List<ChatMessageEntity>> getConversationMessages(
             @PathVariable String conversationId,
-            @RequestParam(defaultValue = "50") int limit) {
+            @RequestParam(defaultValue = "50") int limit,
+            HttpSession session) {
         try {
+            String currentUserId = getCurrentUserId(session);
+            
+            if (currentUserId == null) {
+                return ResponseEntity.status(401).build(); // Unauthorized
+            }
+
             List<ChatMessageEntity> messages = chatService.getMessagesByConversationId(conversationId, limit);
             return ResponseEntity.ok(messages);
 
@@ -146,12 +165,15 @@ public class ChatController {
 
     @PostMapping("/api/chat/conversations")
     @ResponseBody
-    public ResponseEntity<Map<String, String>> createConversation(@RequestBody Map<String, String> request) {
+    public ResponseEntity<Map<String, String>> createConversation(@RequestBody Map<String, String> request, HttpSession session) {
         try {
             String recipientId = request.get("recipientId");
+            String currentUserId = getCurrentUserId(session);
+            String userRole = getCurrentUserRole(session);
             
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String currentUserId = auth.getName();
+            if (currentUserId == null || userRole == null) {
+                return ResponseEntity.status(401).build(); // Unauthorized
+            }
             
             Map<String, Object> currentUserData = userService.getUserDetails(currentUserId);
             Map<String, Object> recipientData = userService.getUserDetails(recipientId);
@@ -162,10 +184,9 @@ public class ChatController {
 
             String currentUserName = (String) currentUserData.get("username");
             String recipientName = (String) recipientData.get("username");
-            String currentUserRole = (String) currentUserData.get("role");
 
             String conversationId;
-            if (currentUserRole.equals("FARMER")) {
+            if (userRole.equals("FARMER")) {
                 conversationId = chatService.createOrGetConversation(currentUserId, recipientId, currentUserName, recipientName);
             } else {
                 conversationId = chatService.createOrGetConversation(recipientId, currentUserId, recipientName, currentUserName);
@@ -184,19 +205,16 @@ public class ChatController {
 
     @PostMapping("/api/chat/conversations/{conversationId}/read")
     @ResponseBody
-    public ResponseEntity<Void> markConversationAsRead(@PathVariable String conversationId) {
+    public ResponseEntity<Void> markConversationAsRead(@PathVariable String conversationId, HttpSession session) {
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String currentUserId = auth.getName();
-            Map<String, Object> userData = userService.getUserDetails(currentUserId);
+            String currentUserId = getCurrentUserId(session);
+            String userRole = getCurrentUserRole(session);
             
-            if (userData == null) {
-                return ResponseEntity.badRequest().build();
+            if (currentUserId == null || userRole == null) {
+                return ResponseEntity.status(401).build(); // Unauthorized
             }
 
-            String userRole = (String) userData.get("role");
             chatService.markConversationAsRead(conversationId, currentUserId, userRole);
-            
             return ResponseEntity.ok().build();
 
         } catch (Exception e) {
@@ -207,19 +225,16 @@ public class ChatController {
 
     @GetMapping("/api/chat/users/search")
     @ResponseBody
-    public ResponseEntity<List<Map<String, Object>>> searchUsers(@RequestParam String query) {
+    public ResponseEntity<List<Map<String, Object>>> searchUsers(@RequestParam String query, HttpSession session) {
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String currentUserId = auth.getName();
-            Map<String, Object> userData = userService.getUserDetails(currentUserId);
+            String currentUserId = getCurrentUserId(session);
+            String userRole = getCurrentUserRole(session);
             
-            if (userData == null) {
-                return ResponseEntity.badRequest().build();
+            if (currentUserId == null || userRole == null) {
+                return ResponseEntity.status(401).build(); // Unauthorized
             }
 
-            String userRole = (String) userData.get("role");
             List<Map<String, Object>> users = userService.searchUsers(query, userRole, currentUserId);
-            
             return ResponseEntity.ok(users);
 
         } catch (Exception e) {
@@ -230,17 +245,15 @@ public class ChatController {
 
     @GetMapping("/api/chat/unread-count")
     @ResponseBody
-    public ResponseEntity<Map<String, Integer>> getUnreadCount() {
+    public ResponseEntity<Map<String, Integer>> getUnreadCount(HttpSession session) {
         try {
-            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-            String currentUserId = auth.getName();
-            Map<String, Object> userData = userService.getUserDetails(currentUserId);
+            String currentUserId = getCurrentUserId(session);
+            String userRole = getCurrentUserRole(session);
             
-            if (userData == null) {
-                return ResponseEntity.badRequest().build();
+            if (currentUserId == null || userRole == null) {
+                return ResponseEntity.status(401).build(); // Unauthorized
             }
 
-            String userRole = (String) userData.get("role");
             int unreadCount = chatService.getUnreadMessageCount(currentUserId, userRole);
             
             Map<String, Integer> response = new HashMap<>();
@@ -256,8 +269,14 @@ public class ChatController {
 
     @DeleteMapping("/api/chat/conversations/{conversationId}")
     @ResponseBody
-    public ResponseEntity<Void> deleteConversation(@PathVariable String conversationId) {
+    public ResponseEntity<Void> deleteConversation(@PathVariable String conversationId, HttpSession session) {
         try {
+            String currentUserId = getCurrentUserId(session);
+            
+            if (currentUserId == null) {
+                return ResponseEntity.status(401).build(); // Unauthorized
+            }
+            
             chatService.deleteConversation(conversationId);
             return ResponseEntity.ok().build();
 

@@ -15,7 +15,9 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            background: linear-gradient(120deg, #3498db, #8e44ad);
+            background: 
+                linear-gradient(120deg, rgba(52, 152, 219, 0.8), rgba(142, 68, 173, 0.8)),
+                url('../static/img/farm.jpg') center/cover no-repeat;
         }
         .container {
             background: white;
@@ -204,7 +206,6 @@
                 <h1>Create Account</h1>
                 <input type="text" name="username" placeholder="Username" required />
                 <input type="email" name="email" placeholder="Email" required />
-                <input type="tel" name="cellphone" placeholder="Cellphone Number" required />
                 <input type="password" name="password" id="signup-password" placeholder="Password" required />
                 <input type="password" id="confirm-password" placeholder="Confirm Password" required />
                 <label for="role" class="form-label">Role</label>

@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Farmer Settings - AgriMarket</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="/css/settings.css" rel="stylesheet">
+</head>
+<body>
+    <div th:replace="fragments/header :: header"></div>
+
+    <div class="settings-container">
+        <div class="row">
+            <div class="col-lg-3">
+                <div class="settings-nav">
+                    <ul class="nav nav-pills flex-column" id="settingsTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active w-100 text-start" id="notifications-tab" data-bs-toggle="pill" 
+                                    data-bs-target="#notifications" type="button" role="tab">
+                                <i class="fas fa-bell me-2"></i>Notifications
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link w-100 text-start" id="privacy-tab" data-bs-toggle="pill" 
+                                    data-bs-target="#privacy" type="button" role="tab">
+                                <i class="fas fa-shield-alt me-2"></i>Privacy & Security
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link w-100 text-start" id="business-tab" data-bs-toggle="pill" 
+                                    data-bs-target="#business" type="button" role="tab">
+                                <i class="fas fa-store me-2"></i>Farm Business
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="col-lg-9">
+                <div class="tab-content" id="settingsTabContent">
+                    <!-- Notifications Tab -->
+                    <div class="tab-pane fade show active" id="notifications" role="tabpanel">
+                        <div class="settings-card">
+                            <h4 class="mb-4"><i class="fas fa-bell me-2"></i>Notification Preferences</h4>
+                            <form id="notificationForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted mb-3">Email Notifications</h6>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="emailNewOrders" 
+                                                   th:checked="${settings.notifications.emailNewOrders}">
+                                            <label class="form-check-label" for="emailNewOrders">
+                                                New Orders from Buyers
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="emailMessages"
+                                                   th:checked="${settings.notifications.emailMessages}">
+                                            <label class="form-check-label" for="emailMessages">
+                                                New Messages
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="emailInventoryAlerts"
+                                                   th:checked="${settings.notifications.emailInventoryAlerts}">
+                                            <label class="form-check-label" for="emailInventoryAlerts">
+                                                Low Inventory Alerts
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted mb-3">Push Notifications</h6>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="pushNotifications"
+                                                   th:checked="${settings.notifications.pushNotifications}">
+                                            <label class="form-check-label" for="pushNotifications">
+                                                Enable Push Notifications
+                                            </label>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="notificationFrequency" class="form-label">Notification Frequency</label>
+                                            <select class="form-select" id="notificationFrequency">
+                                                <option value="immediate" th:selected="${settings.notifications.notificationFrequency == 'immediate'}">Immediate</option>
+                                                <option value="hourly" th:selected="${settings.notifications.notificationFrequency == 'hourly'}">Hourly</option>
+                                                <option value="daily" th:selected="${settings.notifications.notificationFrequency == 'daily'}">Daily Digest</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-2"></i>Save Notification Settings
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Privacy & Security Tab -->
+                    <div class="tab-pane fade" id="privacy" role="tabpanel">
+                        <div class="settings-card">
+                            <h4 class="mb-4"><i class="fas fa-shield-alt me-2"></i>Privacy & Security</h4>
+                            
+                            <form id="privacyForm" class="mb-4">
+                                <h6 class="text-muted mb-3">Privacy Settings</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="profileVisibility" class="form-label">Farm Profile Visibility</label>
+                                            <select class="form-select" id="profileVisibility">
+                                                <option value="public" th:selected="${settings.privacy.profileVisibility == 'public'}">Public (Recommended)</option>
+                                                <option value="private" th:selected="${settings.privacy.profileVisibility == 'private'}">Private</option>
+                                                <option value="verified" th:selected="${settings.privacy.profileVisibility == 'verified'}">Verified Buyers Only</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="showContactInfo"
+                                                   th:checked="${settings.privacy.showContactInfo}">
+                                            <label class="form-check-label" for="showContactInfo">
+                                                Show Contact Information
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="allowMessages"
+                                                   th:checked="${settings.privacy.allowMessages}">
+                                            <label class="form-check-label" for="allowMessages">
+                                                Allow Messages from Buyers
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="twoFactorAuth"
+                                                   th:checked="${settings.privacy.twoFactorAuth}">
+                                            <label class="form-check-label" for="twoFactorAuth">
+                                                Two-Factor Authentication
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-2"></i>Save Privacy Settings
+                                </button>
+                            </form>
+
+                            <hr>
+
+                            <!-- Password Change -->
+                            <form id="passwordForm">
+                                <h6 class="text-muted mb-3">Change Password</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label for="currentPassword" class="form-label">Current Password</label>
+                                            <input type="password" class="form-control" id="currentPassword" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="newPassword" class="form-label">New Password</label>
+                                            <input type="password" class="form-control" id="newPassword" required>
+                                            <div class="password-strength" id="passwordStrength"></div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                            <input type="password" class="form-control" id="confirmPassword" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="alert alert-info">
+                                            <small>
+                                                <strong>Password Requirements:</strong><br>
+                                                • At least 8 characters long<br>
+                                                • Include uppercase and lowercase letters<br>
+                                                • Include at least one number<br>
+                                                • Include at least one special character
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-warning">
+                                    <i class="fas fa-key me-2"></i>Change Password
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Business Settings Tab -->
+                    <div class="tab-pane fade" id="business" role="tabpanel">
+                        <div class="settings-card">
+                            <h4 class="mb-4"><i class="fas fa-store me-2"></i>Farm Business Settings</h4>
+                            <form id="businessForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted mb-3">Order Management</h6>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="autoAcceptOrders"
+                                                   th:checked="${settings.business.autoAcceptOrders}">
+                                            <label class="form-check-label" for="autoAcceptOrders">
+                                                Auto-accept Orders
+                                            </label>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="deliveryRadius" class="form-label">Delivery Radius (km)</label>
+                                            <input type="number" class="form-control" id="deliveryRadius" 
+                                                   th:value="${settings.business.deliveryRadius}" min="1" max="500">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="inventoryAlertThreshold" class="form-label">Low Stock Alert Threshold</label>
+                                            <input type="number" class="form-control" id="inventoryAlertThreshold" 
+                                                   th:value="${settings.business.inventoryAlertThreshold}" min="0" max="1000">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted mb-3">Farm Information</h6>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="organicCertified"
+                                                   th:checked="${settings.business.organicCertified}">
+                                            <label class="form-check-label" for="organicCertified">
+                                                Organic Certified Farm
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="seasonalProducts"
+                                                   th:checked="${settings.business.seasonalProducts}">
+                                            <label class="form-check-label" for="seasonalProducts">
+                                                Seasonal Products Available
+                                            </label>
+                                        </div>
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="weekendAvailable"
+                                                   th:checked="${settings.business.weekendAvailable}">
+                                            <label class="form-check-label" for="weekendAvailable">
+                                                Available on Weekends
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <hr>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted mb-3">Business Hours</h6>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <label for="businessHoursStart" class="form-label">Opening Time</label>
+                                                <input type="time" class="form-control" id="businessHoursStart" 
+                                                       th:value="${settings.business.businessHoursStart}">
+                                            </div>
+                                            <div class="col-6">
+                                                <label for="businessHoursEnd" class="form-label">Closing Time</label>
+                                                <input type="time" class="form-control" id="businessHoursEnd" 
+                                                       th:value="${settings.business.businessHoursEnd}">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="alert alert-success">
+                                            <small>
+                                                <strong>Farm Tips:</strong><br>
+                                                • Enable organic certification to attract more buyers<br>
+                                                • Set realistic delivery radius for better service<br>
+                                                • Auto-accept orders for faster processing<br>
+                                                • Update seasonal availability regularly
+                                            </small>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-2"></i>Save Business Settings
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Show alerts
+        function showAlert(message, type = 'success') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show alert-custom`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Password strength checker
+        document.getElementById('newPassword').addEventListener('input', function() {
+            const password = this.value;
+            const strengthBar = document.getElementById('passwordStrength');
+            
+            let strength = 0;
+            if (password.length >= 8) strength++;
+            if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+            if (/\d/.test(password)) strength++;
+            if (/[^a-zA-Z\d]/.test(password)) strength++;
+            
+            strengthBar.className = 'password-strength';
+            if (strength <= 1) {
+                strengthBar.classList.add('strength-weak');
+            } else if (strength <= 3) {
+                strengthBar.classList.add('strength-medium');
+            } else {
+                strengthBar.classList.add('strength-strong');
+            }
+        });
+
+        // Form submissions
+        document.getElementById('notificationForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                emailNewOrders: document.getElementById('emailNewOrders').checked,
+                emailMessages: document.getElementById('emailMessages').checked,
+                emailInventoryAlerts: document.getElementById('emailInventoryAlerts').checked,
+                pushNotifications: document.getElementById('pushNotifications').checked,
+                notificationFrequency: document.getElementById('notificationFrequency').value
+            };
+            
+            fetch('/farmer/settings/notifications', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showAlert(data.message, data.success ? 'success' : 'danger');
+            })
+            .catch(error => {
+                showAlert('An error occurred while saving settings', 'danger');
+            });
+        });
+
+        document.getElementById('privacyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                profileVisibility: document.getElementById('profileVisibility').value,
+                showContactInfo: document.getElementById('showContactInfo').checked,
+                allowMessages: document.getElementById('allowMessages').checked,
+                twoFactorAuth: document.getElementById('twoFactorAuth').checked
+            };
+            
+            fetch('/farmer/settings/privacy', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showAlert(data.message, data.success ? 'success' : 'danger');
+            })
+            .catch(error => {
+                showAlert('An error occurred while saving settings', 'danger');
+            });
+        });
+
+        document.getElementById('businessForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                autoAcceptOrders: document.getElementById('autoAcceptOrders').checked,
+                deliveryRadius: document.getElementById('deliveryRadius').value,
+                inventoryAlertThreshold: document.getElementById('inventoryAlertThreshold').value,
+                organicCertified: document.getElementById('organicCertified').checked,
+                seasonalProducts: document.getElementById('seasonalProducts').checked,
+                weekendAvailable: document.getElementById('weekendAvailable').checked,
+                businessHoursStart: document.getElementById('businessHoursStart').value,
+                businessHoursEnd: document.getElementById('businessHoursEnd').value
+            };
+            
+            fetch('/farmer/settings/business', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showAlert(data.message, data.success ? 'success' : 'danger');
+            })
+            .catch(error => {
+                showAlert('An error occurred while saving business settings', 'danger');
+            });
+        });
+
+        document.getElementById('passwordForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const newPassword = document.getElementById('newPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (newPassword !== confirmPassword) {
+                showAlert('Passwords do not match', 'danger');
+                return;
+            }
+            
+            const formData = {
+                currentPassword: document.getElementById('currentPassword').value,
+                newPassword: newPassword
+            };
+            
+            fetch('/farmer/settings/change-password', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                showAlert(data.message, data.success ? 'success' : 'danger');
+                if (data.success) {
+                    document.getElementById('passwordForm').reset();
+                }
+            })
+            .catch(error => {
+                showAlert('An error occurred while changing password', 'danger');
+            });
+        });
+    </script>
+</body>
+</html>

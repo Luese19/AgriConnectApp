@@ -1,0 +1,3 @@
+@echo off
+echo Starting Spring Boot application with Java module system fixes...
+mvn spring-boot:run -Dspring-boot.run.jvmArguments="--add-opens java.base/java.time.chrono=ALL-UNNAMED --add-opens java.base/java.time=ALL-UNNAMED --add-opens java.base/java.lang=ALL-UNNAMED --add-opens java.base/java.lang.reflect=ALL-UNNAMED --add-opens java.base/java.util=ALL-UNNAMED --add-opens java.base/java.util.concurrent=ALL-UNNAMED"

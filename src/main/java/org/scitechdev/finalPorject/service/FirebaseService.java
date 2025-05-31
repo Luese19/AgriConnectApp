@@ -136,4 +136,22 @@ public class FirebaseService {
             return false;
         }
     }
+
+    /**
+     * Update a document in Firestore
+     */
+    public boolean updateDocument(String collection, String documentId, Map<String, Object> updateData) {
+        try {
+            System.out.println("Updating document in collection: " + collection + " with ID: " + documentId);
+            Firestore firestore = FirestoreClient.getFirestore();
+            
+            firestore.collection(collection).document(documentId).update(updateData).get();
+            System.out.println("Successfully updated document");
+            return true;
+        } catch (Exception e) {
+            System.err.println("Error updating document: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 }

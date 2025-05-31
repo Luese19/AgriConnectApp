@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/header :: head}">
+    <title>Profile</title>
+    <style>
+        body {
+            font-family: 'Roboto', Arial, sans-serif;
+            background: #f8fafc;
+        }
+        .profile-card {
+            border-radius: 18px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+            border: none;
+            background: white;
+        }
+        .profile-header {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            border-radius: 18px 18px 0 0;
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            border: 4px solid white;
+            margin: 0 auto 1rem;
+            background: rgba(255,255,255,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+        }
+        .form-control {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
+        }
+        .form-control:focus {
+            border-color: #43e97b;
+            box-shadow: 0 0 0 0.2rem rgba(67, 233, 123, 0.25);
+        }
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+        .btn-primary {
+            background: linear-gradient(90deg, #43e97b 0%, #38f9d7 100%);
+            border: none;
+            border-radius: 20px;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+        }
+        .btn-outline-secondary {
+            border-radius: 20px;
+            font-weight: 600;
+            padding: 0.75rem 2rem;
+        }
+        .alert {
+            border-radius: 12px;
+            border: none;
+        }
+        .section-title {
+            color: #198754;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+        .form-section {
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div th:replace="~{fragments/header :: header}"></div>
+
+    <div class="container-fluid">
+        <div class="row">            <!-- Sidebar -->
+            <div th:replace="~{fragments/buyer-sidebar :: buyer-sidebar}"></div>
+
+            <!-- Main Content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3">
+                    <h1 class="h2 text-success">
+                        <i class="bi bi-person-circle me-2"></i>Profile Management
+                    </h1>
+                </div>
+
+                <!-- Success/Error Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="bi bi-check-circle me-2"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Profile Card -->
+                <div class="profile-card mb-4">
+                    <!-- Profile Header -->
+                    <div class="profile-header">
+                        <div class="profile-avatar">
+                            <i class="bi bi-person-fill" th:if="${user.profileImage == null or user.profileImage.isEmpty()}"></i>
+                            <img th:if="${user.profileImage != null and !user.profileImage.isEmpty()}" 
+                                 th:src="${user.profileImage}" 
+                                 alt="Profile Picture" 
+                                 style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                        </div>
+                        <h3 class="mb-2" th:text="${user.fullName != null and !user.fullName.trim().isEmpty()} ? ${user.fullName} : ${user.username}">
+                            User Name
+                        </h3>
+                        <p class="mb-0 opacity-75" th:text="${user.email}">user@example.com</p>
+                        <span class="badge bg-white text-success mt-2" th:text="${user.role}">USER</span>
+                    </div>
+
+                    <!-- Profile Form -->
+                    <div class="card-body p-4">
+                        <form th:action="@{/buyer/profile}" th:object="${user}" method="post">
+                            <!-- Personal Information Section -->
+                            <div class="form-section">
+                                <h4 class="section-title">
+                                    <i class="bi bi-person me-2"></i>Personal Information
+                                </h4>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="firstName" class="form-label">First Name</label>
+                                        <input type="text" class="form-control" id="firstName" 
+                                               th:field="*{firstName}" placeholder="Enter your first name">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="lastName" class="form-label">Last Name</label>
+                                        <input type="text" class="form-control" id="lastName" 
+                                               th:field="*{lastName}" placeholder="Enter your last name">
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="username" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="username" 
+                                               th:field="*{username}" placeholder="Enter your username">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="email" class="form-label">Email</label>
+                                        <input type="email" class="form-control" id="email" 
+                                               th:field="*{email}" placeholder="Enter your email" readonly>
+                                        <div class="form-text">Email cannot be changed for security reasons.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Contact Information Section -->
+                            <div class="form-section">
+                                <h4 class="section-title">
+                                    <i class="bi bi-telephone me-2"></i>Contact Information
+                                </h4>
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="phone" class="form-label">Phone Number</label>
+                                        <input type="tel" class="form-control" id="phone" 
+                                               th:field="*{phone}" placeholder="Enter your phone number">
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="location" class="form-label">Location</label>
+                                        <input type="text" class="form-control" id="location" 
+                                               th:field="*{location}" placeholder="Enter your location">
+                                    </div>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="address" class="form-label">Address</label>
+                                    <textarea class="form-control" id="address" rows="3" 
+                                              th:field="*{address}" placeholder="Enter your full address"></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Profile Picture Section -->
+                            <div class="form-section">
+                                <h4 class="section-title">
+                                    <i class="bi bi-image me-2"></i>Profile Picture
+                                </h4>
+                                <div class="mb-3">
+                                    <label for="profileImage" class="form-label">Profile Image URL</label>
+                                    <input type="url" class="form-control" id="profileImage" 
+                                           th:field="*{profileImage}" placeholder="Enter image URL">
+                                    <div class="form-text">Enter a URL to your profile picture or leave empty for default avatar.</div>
+                                </div>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="d-flex gap-3 justify-content-end">
+                                <button type="button" class="btn btn-outline-secondary" onclick="window.history.back()">
+                                    <i class="bi bi-arrow-left me-2"></i>Cancel
+                                </button>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-lg me-2"></i>Update Profile
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Account Information Card -->
+                <div class="card profile-card">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-shield-check me-2"></i>Account Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Role:</strong> <span class="badge bg-success" th:text="${user.role}">USER</span></p>
+                                <p><strong>Account Status:</strong> <span class="badge bg-success">Active</span></p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Username:</strong> <span th:text="${user.username}">username</span></p>
+                                <p><strong>Email:</strong> <span th:text="${user.email}">email@example.com</span></p>
+                            </div>
+                        </div>
+                        <hr>
+                        <div class="text-muted">
+                            <small>
+                                <i class="bi bi-info-circle me-1"></i>
+                                For security reasons, certain account details like email cannot be modified. 
+                                Contact support if you need to change your email address.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        // Form validation
+        (function() {
+            'use strict';
+            window.addEventListener('load', function() {
+                const form = document.querySelector('form');
+                form.addEventListener('submit', function(event) {
+                    if (form.checkValidity() === false) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    form.classList.add('was-validated');
+                }, false);
+            }, false);
+        })();
+    </script>
+</body>
+</html>

@@ -16,6 +16,27 @@ public class Farmer {
     private String farmerStatus;
     private String farmerImage;
     private String farmerLocation;
+    
+    // Additional fields for enhanced profile management
+    private String farmName;
+    private String ownerName;
+    private String city;
+    private String state;
+    private String zipCode;
+    private String description;
+    private double farmSize;
+    private String establishedYear;
+    private String certifications;
+    
+    // Settings fields
+    private boolean emailNotifications = true;
+    private boolean smsNotifications = false;
+    private String preferredLanguage = "English";
+    private String timezone = "UTC";
+
+    // Default constructor
+    public Farmer() {
+    }
 
 
     public Farmer(String farmerId, String farmerName, String farmerAddress, String farmerPhone, String farmerEmail,
@@ -126,12 +147,113 @@ public class Farmer {
     public String getFarmerLocation() {
         return farmerLocation;
     }
-
-
     public void setFarmerLocation(String farmerLocation) {
         this.farmerLocation = farmerLocation;
     }
 
-    
+    // Getters and setters for new fields
+    public String getFarmName() {
+        return farmName;
+    }
+
+    public void setFarmName(String farmName) {
+        this.farmName = farmName;
+    }
+
+    public String getOwnerName() {
+        return ownerName;
+    }
+
+    public void setOwnerName(String ownerName) {
+        this.ownerName = ownerName;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getZipCode() {
+        return zipCode;
+    }
+
+    public void setZipCode(String zipCode) {
+        this.zipCode = zipCode;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public double getFarmSize() {
+        return farmSize;
+    }
+
+    public void setFarmSize(double farmSize) {
+        this.farmSize = farmSize;
+    }
+
+    public String getEstablishedYear() {
+        return establishedYear;
+    }
+
+    public void setEstablishedYear(String establishedYear) {
+        this.establishedYear = establishedYear;
+    }
+
+    public String getCertifications() {
+        return certifications;
+    }
+
+    public void setCertifications(String certifications) {
+        this.certifications = certifications;
+    }
+
+    public boolean isEmailNotifications() {
+        return emailNotifications;
+    }
+
+    public void setEmailNotifications(boolean emailNotifications) {
+        this.emailNotifications = emailNotifications;
+    }
+
+    public boolean isSmsNotifications() {
+        return smsNotifications;
+    }
+
+    public void setSmsNotifications(boolean smsNotifications) {
+        this.smsNotifications = smsNotifications;
+    }
+
+    public String getPreferredLanguage() {
+        return preferredLanguage;
+    }
+
+    public void setPreferredLanguage(String preferredLanguage) {
+        this.preferredLanguage = preferredLanguage;
+    }
+
+    public String getTimezone() {
+        return timezone;
+    }
+
+    public void setTimezone(String timezone) {
+        this.timezone = timezone;
+    }
     
 }

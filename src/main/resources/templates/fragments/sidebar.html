@@ -26,12 +26,23 @@
                         Orders
                         <span class="badge rounded-pill bg-warning text-dark float-end">8</span>
                     </a>
-                </li>
-                <li class="nav-item">
+                </li>                <li class="nav-item">
                     <a class="nav-link" href="/chat" title="Communication center">
                         <i class="bi bi-chat me-2"></i>
                         Messages
                         <span class="badge rounded-pill bg-danger float-end">3</span>
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${pageTitle} == 'Farmer Profile' ? 'active'" href="/farmer/profile" title="Farmer profile">
+                        <i class="bi bi-person me-2"></i>
+                        Profile
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:classappend="${pageTitle} == 'Farmer Settings' ? 'active'" href="/farmer/settings" title="Account settings">
+                        <i class="bi bi-gear me-2"></i>
+                        Settings
                     </a>
                 </li>
             </ul>

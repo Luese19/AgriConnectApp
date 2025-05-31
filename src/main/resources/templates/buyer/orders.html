@@ -68,14 +68,14 @@
                                                 <th scope="col">Actions</th>
                                             </tr>
                                         </thead>
-                                        <tbody>
-                                            <tr th:each="order : ${orders}">
+                                        <tbody>                                            <tr th:each="order : ${orders}">
                                                 <td>
                                                     <ul th:if="${order.itemNames != null && order.itemNames.size() > 0}">
                                                         <li th:each="i : ${#numbers.sequence(0, order.itemNames.size() - 1)}">
                                                             <span th:text="${order.itemNames[i]}">Product Name</span>
                                                         </li>
                                                     </ul>
+                                                    <span th:if="${order.itemNames == null || order.itemNames.size() == 0}" class="text-muted">No items specified</span>
                                                 </td>
                                                 <td>
                                                     <ul th:if="${order.quantities != null && order.quantities.size() > 0}">
@@ -83,18 +83,36 @@
                                                             <span th:text="${order.quantities[i]}">1</span>
                                                         </li>
                                                     </ul>
+                                                    <span th:if="${order.quantities == null || order.quantities.size() == 0}" class="text-muted">1</span>
                                                 </td>
                                                 <td th:text="${order.totalAmount != null ? '₱' + #numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT') : '₱0.00'}">₱0.00</td>
-                                                <td><span class="badge bg-success" th:text="${order.status}">Status</span></td>
+                                                <td>
+                                                    <span class="badge" 
+                                                          th:class="${order.status == 'Pending' ? 'badge bg-warning text-dark' : 
+                                                                     order.status == 'Processing' ? 'badge bg-info' : 
+                                                                     order.status == 'Delivered' ? 'badge bg-success' : 
+                                                                     order.status == 'Rejected' ? 'badge bg-danger' : 'badge bg-secondary'}" 
+                                                          th:text="${order.status != null ? order.status : 'Unknown'}">Status</span>
+                                                </td>
                                                 <td>
                                                     <div class="btn-group">
                                                         <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
                                                             Actions
                                                         </button>
                                                         <ul class="dropdown-menu">
-                                                            <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#orderModal">View Details</a></li>
+                                                            <li><a class="dropdown-item order-details-link" href="#"
+                                                                   th:data-order-id="${order.orderId != null ? order.orderId : ''}"
+                                                                   th:data-order-date="${order.orderDate != null ? order.orderDate : ''}"
+                                                                   th:data-order-status="${order.status != null ? order.status : 'Unknown'}"
+                                                                   th:data-total-amount="${order.totalAmount != null ? order.totalAmount : 0}"
+                                                                   th:data-delivery-address="${order.deliveryAddress != null ? order.deliveryAddress : 'Not specified'}"
+                                                                   th:data-payment-method="${order.paymentMethod != null ? order.paymentMethod : 'Not specified'}"
+                                                                   th:data-farmer-notes="${order.farmerNotes != null ? order.farmerNotes : ''}"
+                                                                   th:data-estimated-delivery="${order.estimatedDeliveryTime != null ? order.estimatedDeliveryTime : 'Not specified'}"
+                                                                   th:data-order-priority="${order.orderPriority != null ? order.orderPriority : 'normal'}"
+                                                                   data-bs-toggle="modal" data-bs-target="#orderModal">View Details</a></li>
                                                             <li><a class="dropdown-item" href="#">Download Invoice</a></li>
-                                                            <li><a class="dropdown-item" href="#">Leave Review</a></li>
+                                                            <li><a class="dropdown-item" href="#" th:if="${order.status == 'Delivered'}">Leave Review</a></li>
                                                             <li><a class="dropdown-item" href="#">Reorder</a></li>
                                                         </ul>
                                                     </div>
@@ -264,191 +282,76 @@
     <!-- Order Detail Modal -->
     <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="orderModalLabel">Order #ORD-2025-0001</h5>
+            <div class="modal-content">                <div class="modal-header">
+                    <h5 class="modal-title" id="orderModalLabel">Order Details</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row mb-4">
                         <div class="col-md-6">
                             <h6><i class="bi bi-calendar me-2"></i>Order Date</h6>
-                            <p>May 10, 2025 at 10:23 AM</p>
+                            <p id="modal-order-date">-</p>
                             
                             <h6><i class="bi bi-geo-alt me-2"></i>Delivery Address</h6>
-                            <p>123 Main Street<br>Apt 4B<br>Farmington, CA 12345</p>
+                            <p id="modal-delivery-address">-</p>
+                            
+                            <h6><i class="bi bi-flag me-2"></i>Order Priority</h6>
+                            <p id="modal-order-priority">-</p>
                         </div>
                         <div class="col-md-6">
-                            <h6><i class="bi bi-truck me-2"></i>Delivery Status</h6>
-                            <p><span class="badge bg-success">Delivered</span> on May 12, 2025</p>
+                            <h6><i class="bi bi-truck me-2"></i>Order Status</h6>
+                            <p id="modal-order-status">-</p>
                             
                             <h6><i class="bi bi-credit-card me-2"></i>Payment Method</h6>
-                            <p>Visa ending in 4242</p>
+                            <p id="modal-payment-method">-</p>
+                            
+                            <h6><i class="bi bi-clock me-2"></i>Estimated Delivery</h6>
+                            <p id="modal-estimated-delivery">-</p>
                         </div>
                     </div>
                     
-                    <h6 class="mb-3">Order Items</h6>
+                    <!-- Farmer Notes Section -->
+                    <div id="farmer-notes-section" class="mb-4" style="display: none;">
+                        <h6><i class="bi bi-chat-left-text me-2"></i>Farmer Notes</h6>
+                        <div class="alert alert-info">
+                            <p id="modal-farmer-notes" class="mb-0">-</p>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mb-3">Order Summary</h6>
                     <div class="table-responsive">
                         <table class="table table-bordered">
                             <thead class="table-light">
                                 <tr>
                                     <th>Item</th>
-                                    <th>Farm</th>
                                     <th>Quantity</th>
-                                    <th>Price</th>
-                                    <th>Total</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <tr>
-                                    <td>Farm Fresh Tomatoes</td>
-                                    <td>Green Valley Farm</td>
-                                    <td>2 kg</td>
-                                    <td>$4.99/kg</td>
-                                    <td>$9.98</td>
-                                </tr>
-                                <tr>
-                                    <td>Artisan Goat Cheese</td>
-                                    <td>Alpine Dairy Co-op</td>
-                                    <td>1 block</td>
-                                    <td>$8.99/block</td>
-                                    <td>$8.99</td>
-                                </tr>
-                                <tr>
-                                    <td>Organic Kale Bunches</td>
-                                    <td>Green Valley Farm</td>
-                                    <td>2 bunches</td>
-                                    <td>$3.25/bunch</td>
-                                    <td>$6.50</td>
-                                </tr>
-                                <tr>
-                                    <td>Free Range Eggs</td>
-                                    <td>Sunny Meadows</td>
-                                    <td>1 dozen</td>
-                                    <td>$6.50/dozen</td>
-                                    <td>$6.50</td>
-                                </tr>
-                                <tr>
-                                    <td>Fresh Basil</td>
-                                    <td>Green Valley Farm</td>
-                                    <td>1 bunch</td>
-                                    <td>$2.99/bunch</td>
-                                    <td>$2.99</td>
-                                </tr>
+                            <tbody id="modal-order-items">
+                                <!-- Dynamic content will be loaded here -->
                             </tbody>
                             <tfoot>
                                 <tr>
-                                    <td colspan="4" class="text-end fw-bold">Subtotal:</td>
-                                    <td>$34.96</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" class="text-end fw-bold">Shipping:</td>
-                                    <td>$5.00</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" class="text-end fw-bold">Tax:</td>
-                                    <td>$2.79</td>
-                                </tr>
-                                <tr>
-                                    <td colspan="4" class="text-end fw-bold">Total:</td>
-                                    <td class="fw-bold">$42.75</td>
+                                    <td colspan="2" class="text-end fw-bold">Total Amount:</td>
+                                    <td class="fw-bold" id="modal-total-amount">₱0.00</td>
                                 </tr>
                             </tfoot>
                         </table>
-                    </div>
-                    
-                    <hr>
-                    
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h6><i class="bi bi-truck me-2"></i>Delivery Updates</h6>
-                            <ul class="list-group">
-                                <li class="list-group-item d-flex justify-content-between align-items-start">
-                                    <div class="ms-2 me-auto">
-                                        <div class="fw-bold">Delivered</div>
-                                        Package delivered to recipient
-                                    </div>
-                                    <small class="text-muted">May 12, 9:45 AM</small>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-start">
-                                    <div class="ms-2 me-auto">
-                                        <div class="fw-bold">Out for Delivery</div>
-                                        Package is out for delivery
-                                    </div>
-                                    <small class="text-muted">May 12, 7:30 AM</small>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-start">
-                                    <div class="ms-2 me-auto">
-                                        <div class="fw-bold">Shipped</div>
-                                        Package has left the farm
-                                    </div>
-                                    <small class="text-muted">May 11, 3:15 PM</small>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-start">
-                                    <div class="ms-2 me-auto">
-                                        <div class="fw-bold">Processing</div>
-                                        Order is being prepared
-                                    </div>
-                                    <small class="text-muted">May 10, 11:20 AM</small>
-                                </li>
-                                <li class="list-group-item d-flex justify-content-between align-items-start">
-                                    <div class="ms-2 me-auto">
-                                        <div class="fw-bold">Order Placed</div>
-                                        Order confirmed
-                                    </div>
-                                    <small class="text-muted">May 10, 10:23 AM</small>
-                                </li>
-                            </ul>
-                        </div>
-                        <div class="col-md-6">
-                            <h6><i class="bi bi-chat-dots me-2"></i>Contact Farmers</h6>
-                            <div class="list-group">
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <h6 class="mb-1">Green Valley Farm</h6>
-                                        <small class="text-primary">Chat</small>
-                                    </div>
-                                    <small class="text-muted">3 items from this farm</small>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <h6 class="mb-1">Alpine Dairy Co-op</h6>
-                                        <small class="text-primary">Chat</small>
-                                    </div>
-                                    <small class="text-muted">1 item from this farm</small>
-                                </a>
-                                <a href="#" class="list-group-item list-group-item-action">
-                                    <div class="d-flex w-100 justify-content-between align-items-center">
-                                        <h6 class="mb-1">Sunny Meadows</h6>
-                                        <small class="text-primary">Chat</small>
-                                    </div>
-                                    <small class="text-muted">1 item from this farm</small>
-                                </a>
-                            </div>
-                            
-                            <h6 class="mt-4"><i class="bi bi-star me-2"></i>Leave a Review</h6>
-                            <div class="card">
-                                <div class="card-body">
-                                    <p class="card-text">How was your experience with this order?</p>
-                                    <div class="rating mb-3">
-                                        <i class="bi bi-star fs-4 me-1 rating-star"></i>
-                                        <i class="bi bi-star fs-4 me-1 rating-star"></i>
-                                        <i class="bi bi-star fs-4 me-1 rating-star"></i>
-                                        <i class="bi bi-star fs-4 me-1 rating-star"></i>
-                                        <i class="bi bi-star fs-4 me-1 rating-star"></i>
-                                    </div>
-                                    <div class="mb-3">
-                                        <textarea class="form-control" rows="3" placeholder="Share your thoughts about this order..."></textarea>
-                                    </div>
-                                    <button class="btn btn-sm btn-primary">Submit Review</button>
-                                </div>
-                            </div>
+                    </div>                    
+                    <!-- Order Status Timeline -->
+                    <div class="mt-4">
+                        <h6><i class="bi bi-clock-history me-2"></i>Order Timeline</h6>
+                        <div id="order-timeline">
+                            <!-- Timeline will be dynamically populated based on order status -->
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-outline-primary"><i class="bi bi-chat-dots me-1"></i>Contact Farmer</button>
                     <button type="button" class="btn btn-primary"><i class="bi bi-arrow-repeat me-1"></i>Reorder</button>
+                </div>
                 </div>
             </div>
         </div>
@@ -481,13 +384,26 @@
                         <div class="mb-3" id="addressField">
                             <label for="deliveryAddress" class="form-label">Delivery Address</label>
                             <input type="text" class="form-control" id="deliveryAddress" name="deliveryAddress" placeholder="Enter your address" required>
-                        </div>
-                        <div class="mb-3">
+                        </div>                        <div class="mb-3">
                             <label for="paymentMethod" class="form-label">Payment Method</label>
                             <select class="form-select" id="paymentMethod" name="paymentMethod" required>
                                 <option value="cod">Cash on Delivery</option>
                                 <option value="card">Credit/Debit Card</option>
                             </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="orderPriority" class="form-label">Order Priority</label>
+                            <select class="form-select" id="orderPriority" name="orderPriority" required>
+                                <option value="normal" selected>Normal (Standard Processing)</option>
+                                <option value="urgent">Urgent (+₱15.00 - Priority Handling)</option>
+                                <option value="express">Express (+₱25.00 - Expedited Processing)</option>
+                            </select>
+                            <div class="form-text">
+                                <small class="text-muted">
+                                    <i class="bi bi-info-circle me-1"></i>
+                                    Higher priority orders receive faster processing and handling by farmers.
+                                </small>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -498,8 +414,7 @@
             </div>
         </div>
     </div>
-    <script>
-        // Show/hide address field based on delivery option
+    <script>        // Show/hide address field based on delivery option
         const deliveryOption = document.getElementById('deliveryOption');
         const addressField = document.getElementById('addressField');
         if (deliveryOption && addressField) {
@@ -511,13 +426,44 @@
                 }
             });
         }
+
+        // Handle order priority changes for checkout modal
+        const orderPriority = document.getElementById('orderPriority');
+        if (orderPriority) {
+            orderPriority.addEventListener('change', function() {
+                let priorityFee = 0;
+                
+                switch(this.value) {
+                    case 'urgent':
+                        priorityFee = 15.00;
+                        break;
+                    case 'express':
+                        priorityFee = 25.00;
+                        break;
+                    default:
+                        priorityFee = 0;
+                        break;
+                }
+                
+                // Update the option text to show fee
+                const options = this.querySelectorAll('option');
+                options.forEach(option => {
+                    if (option.value === 'normal') {
+                        option.textContent = 'Normal (Standard Processing)';
+                    } else if (option.value === 'urgent') {
+                        option.textContent = 'Urgent (+₱15.00 - Priority Handling)';
+                    } else if (option.value === 'express') {
+                        option.textContent = 'Express (+₱25.00 - Expedited Processing)';
+                    }
+                });
+            });
+        }
     </script>
     <!-- Bootstrap JavaScript and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
     
-    <!-- Custom JavaScript for Order History -->
-    <script>
+    <!-- Custom JavaScript for Order History -->    <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Star rating functionality
             const ratingStars = document.querySelectorAll('.rating-star');
@@ -533,25 +479,253 @@
                     }
                 });
             });
-            
-            // Order modal dynamic content
-            const orderLinks = document.querySelectorAll('.order-link');
-            orderLinks.forEach(link => {
+              // Enhanced order modal functionality
+            const orderDetailLinks = document.querySelectorAll('.order-details-link');
+            orderDetailLinks.forEach(link => {
                 link.addEventListener('click', function() {
-                    // In a real app, this would fetch the order details and update the modal
-                    const orderId = this.textContent;
-                    document.getElementById('orderModalLabel').textContent = orderId;
+                    const orderId = this.getAttribute('data-order-id');
+                    const orderDate = this.getAttribute('data-order-date');
+                    const orderStatus = this.getAttribute('data-order-status');
+                    const totalAmount = this.getAttribute('data-total-amount');
+                    const deliveryAddress = this.getAttribute('data-delivery-address');
+                    const paymentMethod = this.getAttribute('data-payment-method');
+                    const farmerNotes = this.getAttribute('data-farmer-notes');
+                    const estimatedDelivery = this.getAttribute('data-estimated-delivery');
+                    const orderPriority = this.getAttribute('data-order-priority');
+                    
+                    // Update modal content
+                    document.getElementById('orderModalLabel').textContent = orderId ? `Order #${orderId}` : 'Order Details';
+                    document.getElementById('modal-order-date').textContent = formatDate(orderDate) || 'Not available';
+                    document.getElementById('modal-delivery-address').textContent = deliveryAddress || 'Not specified';
+                    document.getElementById('modal-order-priority').textContent = capitalizeFirst(orderPriority) || 'Normal';
+                    document.getElementById('modal-payment-method').textContent = paymentMethod || 'Not specified';
+                    document.getElementById('modal-estimated-delivery').textContent = estimatedDelivery || 'Not specified';
+                    document.getElementById('modal-total-amount').textContent = totalAmount ? `₱${parseFloat(totalAmount).toFixed(2)}` : '₱0.00';
+                    
+                    // Update order status with appropriate badge
+                    const statusElement = document.getElementById('modal-order-status');
+                    const statusBadge = getStatusBadge(orderStatus);
+                    statusElement.innerHTML = statusBadge;
+                    
+                    // Show/hide farmer notes section
+                    const farmerNotesSection = document.getElementById('farmer-notes-section');
+                    const farmerNotesElement = document.getElementById('modal-farmer-notes');
+                    if (farmerNotes && farmerNotes.trim() !== '') {
+                        farmerNotesElement.textContent = farmerNotes;
+                        farmerNotesSection.style.display = 'block';
+                    } else {
+                        farmerNotesSection.style.display = 'none';
+                    }
+                    
+                    // Update order timeline based on status
+                    updateOrderTimeline(orderStatus, orderDate);
+                    
+                    // Load order items with loading state
+                    const itemsTable = document.getElementById('modal-order-items');
+                    itemsTable.innerHTML = `
+                        <tr>
+                            <td colspan="3" class="text-center">
+                                <div class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></div>
+                                Loading order items...
+                            </td>
+                        </tr>
+                    `;
+                    
+                    // Load order items
+                    loadOrderItems(orderId);
                 });
             });
             
+            // Helper functions
+            function formatDate(dateString) {
+                if (!dateString) return null;
+                try {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString() + ' at ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                } catch (e) {
+                    return dateString;
+                }
+            }
+              function capitalizeFirst(str) {
+                if (!str) return null;
+                switch (str.toLowerCase()) {
+                    case 'normal':
+                        return 'Normal (Standard Processing)';
+                    case 'urgent':
+                        return 'Urgent (Priority Handling)';
+                    case 'express':
+                        return 'Express (Expedited Processing)';
+                    default:
+                        return str.charAt(0).toUpperCase() + str.slice(1);
+                }
+            }
+            
+            function getStatusBadge(status) {
+                switch (status) {
+                    case 'Pending':
+                        return '<span class="badge bg-warning text-dark">Pending</span>';
+                    case 'Processing':
+                        return '<span class="badge bg-info">Processing</span>';
+                    case 'Delivered':
+                        return '<span class="badge bg-success">Delivered</span>';
+                    case 'Rejected':
+                        return '<span class="badge bg-danger">Rejected</span>';
+                    default:
+                        return '<span class="badge bg-secondary">' + (status || 'Unknown') + '</span>';
+                }
+            }
+            
+            function updateOrderTimeline(status, orderDate) {
+                const timeline = document.getElementById('order-timeline');
+                let timelineHtml = '';
+                
+                // Always show order placed
+                timelineHtml += `
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="bi bi-check-circle-fill text-success me-3"></i>
+                        <div>
+                            <strong>Order Placed</strong><br>
+                            <small class="text-muted">${formatDate(orderDate) || 'Date not available'}</small>
+                        </div>
+                    </div>
+                `;
+                
+                // Add status-specific timeline items
+                if (status === 'Processing' || status === 'Delivered') {
+                    timelineHtml += `
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-3"></i>
+                            <div>
+                                <strong>Order Accepted</strong><br>
+                                <small class="text-muted">Farmer has accepted your order</small>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                if (status === 'Delivered') {
+                    timelineHtml += `
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-check-circle-fill text-success me-3"></i>
+                            <div>
+                                <strong>Order Delivered</strong><br>
+                                <small class="text-muted">Your order has been delivered</small>
+                            </div>
+                        </div>
+                    `;
+                } else if (status === 'Rejected') {
+                    timelineHtml += `
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-x-circle-fill text-danger me-3"></i>
+                            <div>
+                                <strong>Order Rejected</strong><br>
+                                <small class="text-muted">This order was rejected by the farmer</small>
+                            </div>
+                        </div>
+                    `;
+                } else if (status === 'Pending') {
+                    timelineHtml += `
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-clock text-warning me-3"></i>
+                            <div>
+                                <strong>Awaiting Farmer Response</strong><br>
+                                <small class="text-muted">Your order is waiting for farmer acceptance</small>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                timeline.innerHTML = timelineHtml;
+            }            function loadOrderItems(orderId) {
+                if (!orderId) {
+                    console.error('No order ID provided for loading items');
+                    document.getElementById('modal-order-items').innerHTML = `
+                        <tr>
+                            <td colspan="3" class="text-center text-muted">
+                                <i class="bi bi-exclamation-triangle me-2"></i>Order ID not available
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+
+                // Use the new API endpoint to get order details
+                fetch(`/buyer/orders/api/${orderId}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(order => {
+                        const itemsTable = document.getElementById('modal-order-items');
+                        let itemsHtml = '';
+                        
+                        if (order.itemNames && order.itemNames.length > 0) {
+                            for (let i = 0; i < order.itemNames.length; i++) {
+                                const productName = order.itemNames[i] || 'Unknown Product';
+                                const quantity = (order.quantities && order.quantities[i]) ? order.quantities[i] : '1';
+                                
+                                itemsHtml += `
+                                    <tr>
+                                        <td>${productName}</td>
+                                        <td>${quantity}</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" onclick="reorderItem('${productName}')">
+                                                <i class="bi bi-arrow-repeat me-1"></i>Reorder
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `;
+                            }
+                        } else {
+                            itemsHtml = `
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted">
+                                        <i class="bi bi-box-seam me-2"></i>No items found for this order
+                                    </td>
+                                </tr>
+                            `;
+                        }
+                        
+                        itemsTable.innerHTML = itemsHtml;
+                    })
+                    .catch(error => {
+                        console.error('Error loading order items:', error);
+                        document.getElementById('modal-order-items').innerHTML = `
+                            <tr>
+                                <td colspan="3" class="text-center text-danger">
+                                    <i class="bi bi-exclamation-triangle me-2"></i>Failed to load order items. Please try again.
+                                </td>
+                            </tr>
+                        `;
+                    });
+            }
+            
+            // Function to handle reordering individual items
+            function reorderItem(productName) {
+                // In a real application, this would add the item to cart or redirect to product page
+                alert(`Reordering: ${productName}`);
+                console.log('Reorder item:', productName);
+            }
+            
+            // Function to handle reordering entire order
+            function reorderOrder(orderId) {
+                // In a real application, this would add all items from the order to cart
+                alert(`Reordering entire order: ${orderId}`);
+                console.log('Reorder order:', orderId);
+            }
+            
             // Search functionality
             const searchInput = document.querySelector('.search-container input');
-            searchInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    // In a real app, this would filter the orders based on the search query
-                    console.log('Searching for:', this.value);
-                }
-            });
+            if (searchInput) {
+                searchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        // In a real app, this would filter the orders based on the search query
+                        console.log('Searching for:', this.value);
+                    }
+                });
+            }
         });
     </script>
 </body>

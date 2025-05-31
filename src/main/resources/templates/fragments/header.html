@@ -4,16 +4,81 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AgriConnect Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">
-    <link rel="stylesheet" th:href="@{/css/main.css}">
-    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
-    <link rel="stylesheet" th:href="@{/css/buyer-dashboard.css}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.3/font/bootstrap-icons.css">    <link rel="stylesheet" th:href="@{/css/main.css}">
+    <!-- Only load dashboard CSS for dashboard pages -->
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}" th:if="${pageTitle != null and (pageTitle.contains('Dashboard') or pageTitle.contains('Farmer'))}">
+    <link rel="stylesheet" th:href="@{/css/buyer-dashboard.css}" th:if="${pageTitle != null and pageTitle.contains('Buyer')}">
     <!-- Fallback CSS if the main one doesn't load -->
-    <link rel="stylesheet" th:href="@{/css/dashboard.min.css}">
-    <style>
+    <link rel="stylesheet" th:href="@{/css/dashboard.min.css}" th:if="${pageTitle != null and (pageTitle.contains('Dashboard') or pageTitle.contains('Farmer'))}"><style>
         /* Critical CSS styles to ensure basic functionality */
         html, body { height: 100%; overflow-y: auto !important; }
-        body { padding-top: 56px; }
+          /* Fixed navbar styles - ensure consistent height */
+        .navbar {
+            height: 56px !important;
+            min-height: 56px !important;
+            padding-top: 0.25rem !important;
+            padding-bottom: 0.25rem !important;
+        }
+        
+        /* Smaller navbar for checkout pages */
+        body.checkout-page .navbar {
+            height: 48px !important;
+            min-height: 48px !important;
+            max-height: 48px !important;
+            padding-top: 0.2rem !important;
+            padding-bottom: 0.2rem !important;
+        }
+        
+        .navbar-brand {
+            font-size: 1.1rem !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+        
+        body.checkout-page .navbar-brand {
+            font-size: 1rem !important;
+        }
+        
+        .navbar-brand img {
+            height: 28px !important;
+            width: auto !important;
+        }
+        
+        body.checkout-page .navbar-brand img {
+            height: 24px !important;
+            max-height: 24px !important;
+        }
+          .navbar-nav .nav-link {
+            padding-top: 0.375rem !important;
+            padding-bottom: 0.375rem !important;
+        }
+        
+        /* Cart badge styling */
+        .cart-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background-color: #dc3545;
+            color: white;
+            border-radius: 50%;
+            padding: 0.25em 0.4em;
+            font-size: 0.65em;
+            font-weight: bold;
+            min-width: 1.5em;
+            text-align: center;
+        }
+        
+        /* Notification badge styling */
+        .navbar .badge {
+            font-size: 0.6em;
+            padding: 0.25em 0.4em;
+        }
+          /* Body padding to account for fixed navbar */
+        body { padding-top: 56px !important; }
+        
+        /* Smaller padding for checkout pages */
+        body.checkout-page { padding-top: 48px !important; }
+        
         .sidebar { position: fixed; top: 56px; bottom: 0; left: 0; z-index: 100; padding: 20px 0 0; overflow-y: auto; }
         main { height: calc(100vh - 56px); overflow-y: auto; padding-bottom: 60px; }
         .dashboard-card { border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,.1); margin-bottom: 20px; }
@@ -58,10 +123,15 @@
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-label="User menu" title="User menu">
                                 <i class="bi bi-person-circle me-1 fs-5"></i>
                                 <span class="fw-semibold" th:text="${#authentication?.name}">User</span>
-                            </a>
-                            <ul class="dropdown-menu dropdown-menu-end">
-                                <li><a class="dropdown-item" th:href="@{/buyer/profile}"><i class="bi bi-person me-2"></i>Profile</a></li>
-                                <li><a class="dropdown-item" th:href="@{/buyer/settings}"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                            </a>                            <ul class="dropdown-menu dropdown-menu-end">
+                                <!-- Dynamic profile and settings links based on user role -->
+                                <li><a class="dropdown-item" th:href="@{/buyer/profile}" th:if="${#authorization.expression('hasRole(''BUYER'')')}"><i class="bi bi-person me-2"></i>Profile</a></li>
+                                <li><a class="dropdown-item" th:href="@{/buyer/settings}" th:if="${#authorization.expression('hasRole(''BUYER'')')}"><i class="bi bi-gear me-2"></i>Settings</a></li>
+                                
+                                <!-- Farmer links -->
+                                <li><a class="dropdown-item" th:href="@{/farmer/profile}" th:if="${#authorization.expression('hasRole(''FARMER'')')}"><i class="bi bi-person me-2"></i>Farm Profile</a></li>
+                                <li><a class="dropdown-item" th:href="@{/farmer/settings}" th:if="${#authorization.expression('hasRole(''FARMER'')')}"><i class="bi bi-gear me-2"></i>Farm Settings</a></li>
+                                
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item text-danger" href="/logout"><i class="bi bi-box-arrow-right me-2"></i>Logout</a></li>
                             </ul>

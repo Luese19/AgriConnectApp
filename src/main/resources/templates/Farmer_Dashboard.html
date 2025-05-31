@@ -33,34 +33,32 @@
                     </div>
                 </div>                <!-- Quick Stats Section -->
                 <div class="row g-3 mb-4">
-                    <div class="col-md-4">
-                        <div class="card dashboard-card stat-card card-inventory">
+                    <div class="col-md-4">                <div class="card dashboard-card stat-card card-inventory">
                             <div class="card-body d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="stat-label">Total Inventory</h6>
-                                    <h3 class="stat-value" th:text="${totalInventory ?: '24'}">24</h3>
+                                    <h3 class="stat-value" data-stat="total-items" th:text="${totalInventory ?: '24'}">24</h3>
                                     <p class="mb-0">Items in stock</p>
                                 </div>
                                 <div class="position-relative">
                                     <i class="bi bi-box text-success"></i>
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" 
-                                          th:text="${totalInventory ?: '24'}">24</span>
+                                          data-stat="total-items" th:text="${totalInventory ?: '24'}">24</span>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="col-md-4">
-                        <div class="card dashboard-card stat-card card-orders">
+                    <div class="col-md-4">                        <div class="card dashboard-card stat-card card-orders">
                             <div class="card-body d-flex justify-content-between align-items-center">
                                 <div>
                                     <h6 class="stat-label">Order Requests</h6>
-                                    <h3 class="stat-value" th:text="${orderRequests != null ? orderRequests.size() : '0'}">0</h3>
+                                    <h3 class="stat-value" data-stat="total-orders" th:text="${orderRequests != null ? orderRequests.size() : '0'}">0</h3>
                                     <p class="mb-0">Total orders</p>
                                 </div>
                                 <div class="position-relative">
                                     <i class="bi bi-bag-check text-primary"></i>
                                     <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-primary" 
-                                          th:text="${orderRequests != null ? orderRequests.size() : '0'}">0</span>
+                                          data-stat="total-orders" th:text="${orderRequests != null ? orderRequests.size() : '0'}">0</span>
                                 </div>
                             </div>
                         </div>
@@ -72,13 +70,63 @@
                         <section id="orders" class="mb-4">
                             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
                                 <h2><i class="bi bi-bag-check me-2 text-primary"></i>Order Requests</h2>
-                                <div class="d-flex gap-2">                                    <!-- Search Orders -->
+                                <div class="d-flex gap-2">                                    <!-- Quick Stats for Order Management -->
+                                    <div class="btn-group" role="group" aria-label="Order stats">                                        <span class="badge bg-warning text-dark fs-6 px-3 py-2 me-2" th:if="${orderRequests != null}">
+                                            <i class="bi bi-clock me-1"></i>
+                                            <span data-stat="pending-orders" th:text="${pendingOrdersCount ?: 0}">0</span> Pending
+                                        </span>
+                                        <span class="badge bg-info text-white fs-6 px-3 py-2 me-2" th:if="${orderRequests != null}">
+                                            <i class="bi bi-check-circle me-1"></i>
+                                            <span data-stat="processing-orders" th:text="${processingOrdersCount ?: 0}">0</span> Accepted
+                                        </span>
+                                    </div>                                    <!-- Search Orders -->
                                     <div class="input-group order-search-input">
                                         <input type="text" class="form-control form-control-sm" placeholder="Search orders..." id="orderSearch">
                                         <button class="btn btn-outline-secondary btn-sm" type="button">
                                             <i class="bi bi-search"></i>
                                         </button>
                                     </div>
+                                    
+                                    <!-- Advanced Filters -->
+                                    <div class="dropdown">
+                                        <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="advancedFiltersDropdown" data-bs-toggle="dropdown">
+                                            <i class="bi bi-sliders me-1"></i>Advanced Filters
+                                        </button>
+                                        <div class="dropdown-menu p-3" style="min-width: 300px;">
+                                            <h6 class="dropdown-header">Filter Orders</h6>
+                                            <div class="mb-3">
+                                                <label class="form-label">Date Range</label>
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <input type="date" class="form-control form-control-sm" id="dateFrom" placeholder="From">
+                                                    </div>
+                                                    <div class="col">
+                                                        <input type="date" class="form-control form-control-sm" id="dateTo" placeholder="To">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Amount Range</label>
+                                                <div class="row">
+                                                    <div class="col">
+                                                        <input type="number" class="form-control form-control-sm" id="amountFrom" placeholder="Min ₱">
+                                                    </div>
+                                                    <div class="col">
+                                                        <input type="number" class="form-control form-control-sm" id="amountTo" placeholder="Max ₱">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label">Customer</label>
+                                                <input type="text" class="form-control form-control-sm" id="customerFilter" placeholder="Customer name or ID">
+                                            </div>
+                                            <div class="d-flex gap-2">
+                                                <button type="button" class="btn btn-sm btn-primary" onclick="applyAdvancedFilters()">Apply</button>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary" onclick="clearAdvancedFilters()">Clear</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                     <!-- Filter Dropdown -->
                                     <div class="dropdown">
                                         <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="orderFilterDropdown" data-bs-toggle="dropdown">
@@ -96,199 +144,348 @@
                                             </a></li>
                                             <li><a class="dropdown-item filter-option" href="#" data-filter="delivered">
                                                 <i class="bi bi-truck me-2"></i>Delivered Orders
-                                            </a></li>
-                                            <li><a class="dropdown-item filter-option" href="#" data-filter="canceled">
+                                            </a></li>                                            <li><a class="dropdown-item filter-option" href="#" data-filter="canceled">
                                                 <i class="bi bi-x-circle me-2"></i>Canceled Orders
                                             </a></li>
                                         </ul>
                                     </div>
-                                </div>
-                            </div>
-                            
+                                    
+                                    <!-- Export Dropdown -->
+                                    <div class="dropdown ms-2">
+                                        <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown">
+                                            <i class="bi bi-download me-1"></i>Export
+                                        </button>
+                                        <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                                            <li><h6 class="dropdown-header">Export All Orders</h6></li>
+                                            <li><a class="dropdown-item" href="/farmer/export/orders?format=csv">
+                                                <i class="bi bi-filetype-csv me-2"></i>Export as CSV
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="/farmer/export/orders?format=pdf">
+                                                <i class="bi bi-filetype-txt me-2"></i>Export as Text
+                                            </a></li>
+                                            <li><hr class="dropdown-divider"></li>
+                                            <li><h6 class="dropdown-header">Export by Status</h6></li>
+                                            <li><a class="dropdown-item" href="/farmer/export/orders?format=csv&status=Pending">
+                                                <i class="bi bi-clock me-2"></i>Pending Orders (CSV)
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="/farmer/export/orders?format=csv&status=Processing">
+                                                <i class="bi bi-gear me-2"></i>Processing Orders (CSV)
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="/farmer/export/orders?format=csv&status=Delivered">
+                                                <i class="bi bi-check-circle me-2"></i>Delivered Orders (CSV)
+                                            </a></li>
+                                        </ul>
+                                    </div>
+                                </div></div>                            <!-- Order Management Tabs -->
                             <div class="card dashboard-card enhanced-order-table">
                                 <div class="card-header bg-light">
-                                    <div class="row align-items-center">
-                                        <div class="col">
-                                            <h6 class="mb-0 text-muted">
-                                                <span id="orderCount" th:text="${orderRequests != null ? orderRequests.size() : 0}">0</span> 
-                                                order(s) found
-                                            </h6>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="mb-1"><i class="bi bi-bag-check me-2"></i>Order Management</h5>
+                                            <small class="text-muted">Manage your orders by status</small>
                                         </div>
-                                        <div class="col-auto">
-                                            <button class="btn btn-sm btn-outline-primary" id="refreshOrders" data-bs-toggle="tooltip" title="Refresh Orders">
-                                                <i class="bi bi-arrow-clockwise"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>                                <div class="card-body p-0">
-                                    <div class="table-responsive">
-                                        <table class="table table-hover table-order-requests mb-0">
-                                            <thead class="table-light">
-                                                <tr>
-                                                    <th scope="col" class="sortable" data-sort="orderId">
-                                                        <i class="bi bi-hash me-1"></i>Order ID
-                                                        <i class="bi bi-arrow-up-down sort-icon"></i>
-                                                    </th>
-                                                    <th scope="col" class="sortable" data-sort="customer">
-                                                        <i class="bi bi-person me-1"></i>Customer
-                                                        <i class="bi bi-arrow-up-down sort-icon"></i>
-                                                    </th>
-                                                    <th scope="col">
-                                                        <i class="bi bi-geo-alt me-1"></i>Delivery Address
-                                                    </th>
-                                                    <th scope="col">
-                                                        <i class="bi bi-box-seam me-1"></i>Products
-                                                    </th>
-                                                    <th scope="col" class="sortable" data-sort="amount">
-                                                        <i class="bi bi-currency-dollar me-1"></i>Amount
-                                                        <i class="bi bi-arrow-up-down sort-icon"></i>
-                                                    </th>
-                                                    <th scope="col">
-                                                        <i class="bi bi-info-circle me-1"></i>Status
-                                                    </th>
-                                                    <th scope="col" class="text-center">
-                                                        <i class="bi bi-gear me-1"></i>Actions
-                                                    </th>
-                                                </tr>
-                                            </thead>
-                                            <tbody id="orderTableBody">
-                                                <tr th:each="order, iterStat : ${orderRequests}" class="order-row" 
-                                                    th:data-status="${order.status}" 
-                                                    th:data-order-id="${order.orderId}"
-                                                    th:data-customer="${order.buyerId}">                                                    <td>
-                                                        <span class="fw-bold text-primary order-id-text" th:text="'#' + ${#strings.abbreviate(order.orderId, 12)}"></span>
-                                                        <small class="text-muted" th:text="${#temporals.format(order.orderDate, 'MMM dd, yyyy')}">May 26, 2025</small>
-                                                    </td>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="avatar-sm me-2">
-                                                                <i class="bi bi-person-circle text-secondary person-circle-lg"></i>
-                                                            </div>
-                                                            <div class="flex-grow-1 customer-info">
-                                                                <div class="fw-semibold customer-name" th:text="${order.buyerId}" th:title="${order.buyerId}">Customer Name</div>
-                                                                <small class="text-muted">Verified Buyer</small>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="address-cell">
-                                                            <i class="bi bi-geo-alt-fill text-danger me-1"></i>
-                                                            <span class="address-text" th:text="${order.deliveryAddress}" th:title="${order.deliveryAddress}">Address</span>
-                                                            <button class="btn btn-sm btn-link p-0 ms-1" data-bs-toggle="tooltip" title="View on map">
-                                                                <i class="bi bi-map text-primary"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="product-cell">
-                                                            <span class="product-names product-text" 
-                                                                  th:text="${order.itemNames != null ? order.itemNames.toString().replace('[','').replace(']','') : 'No items'}"
-                                                                  th:title="${order.itemNames != null ? order.itemNames.toString().replace('[','').replace(']','') : 'No items'}">Products</span>
-                                                            <small class="d-block text-muted">
-                                                                <span th:text="${order.itemNames != null ? order.itemNames.size() : 0}">0</span> item(s)
-                                                            </small>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div class="amount-cell">
-                                                            <span class="fw-bold text-success fs-6" th:text="'₱' + ${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
-                                                            <small class="d-block text-muted">Total</small>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge status-badge" 
-                                                              th:classappend="${order.status == 'pending' ? 'bg-warning text-dark' : 
-                                                                              order.status == 'accepted' ? 'bg-info text-white' : 
-                                                                              order.status == 'delivered' ? 'bg-success' : 
-                                                                              order.status == 'canceled' ? 'bg-danger' : 'bg-secondary'}" 
-                                                              th:text="${order.status}">Status</span>
-                                                    </td>
-                                                    <td class="text-center">
-                                                        <div class="action-buttons">
-                                                            <!-- View Details Button -->
-                                                            <button class="btn btn-sm btn-outline-info me-1" 
-                                                                    data-bs-toggle="modal" 
-                                                                    data-bs-target="#orderDetailsModal"
-                                                                    th:data-order-id="${order.orderId}"
-                                                                    title="View Details">
-                                                                <i class="bi bi-eye"></i>
-                                                            </button>
-                                                            
-                                                            <!-- Accept/Reject Buttons for Pending Orders -->
-                                                            <div th:if="${order.status == 'pending'}" class="d-inline">
-                                                                <form th:action="@{/farmer/order/accept}" method="post" class="d-inline">
-                                                                    <input type="hidden" name="orderId" th:value="${order.orderId}" />
-                                                                    <button class="btn btn-sm btn-outline-success me-1" type="submit" 
-                                                                            data-bs-toggle="tooltip" title="Accept Order"
-                                                                            onclick="return confirm('Are you sure you want to accept this order?')">
-                                                                        <i class="bi bi-check-lg"></i>
-                                                                    </button>
-                                                                </form>
-                                                                <form th:action="@{/farmer/order/reject}" method="post" class="d-inline">
-                                                                    <input type="hidden" name="orderId" th:value="${order.orderId}" />
-                                                                    <button class="btn btn-sm btn-outline-danger" type="submit" 
-                                                                            data-bs-toggle="tooltip" title="Reject Order"
-                                                                            onclick="return confirm('Are you sure you want to reject this order?')">
-                                                                        <i class="bi bi-x-lg"></i>
-                                                                    </button>
-                                                                </form>
-                                                            </div>
-                                                            
-                                                            <!-- Contact Button for Accepted Orders -->
-                                                            <div th:if="${order.status == 'accepted'}" class="d-inline">
-                                                                <button class="btn btn-sm btn-outline-primary me-1" 
-                                                                        data-bs-toggle="tooltip" title="Contact Customer">
-                                                                    <i class="bi bi-chat-dots"></i>
-                                                                </button>
-                                                                <button class="btn btn-sm btn-outline-success" 
-                                                                        data-bs-toggle="tooltip" title="Mark as Delivered">
-                                                                    <i class="bi bi-truck"></i>
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                </tr>                                                <!-- Empty State -->
-                                                <tr id="emptyState" class="text-center empty-state-hidden">
-                                                    <td colspan="7" class="py-4">
-                                                        <i class="bi bi-inbox text-muted empty-state-icon"></i>
-                                                        <h5 class="mt-3 text-muted">No orders found</h5>
-                                                        <p class="text-muted">Try adjusting your search or filter criteria</p>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </div>
-                                <!-- Pagination -->
-                                <div class="card-footer bg-light">
-                                    <div class="row align-items-center">
-                                        <div class="col">
-                                            <small class="text-muted">
-                                                Showing <span id="showingStart">1</span> to <span id="showingEnd">10</span> 
-                                                of <span id="totalOrders" th:text="${orderRequests != null ? orderRequests.size() : 0}">0</span> orders
-                                            </small>
-                                        </div>
-                                        <div class="col-auto">
-                                            <nav aria-label="Order pagination">
-                                                <ul class="pagination pagination-sm mb-0">
-                                                    <li class="page-item disabled">
-                                                        <a class="page-link" href="#" tabindex="-1">Previous</a>
-                                                    </li>
-                                                    <li class="page-item active">
-                                                        <a class="page-link" href="#">1</a>
-                                                    </li>
-                                                    <li class="page-item">
-                                                        <a class="page-link" href="#">2</a>
-                                                    </li>
-                                                    <li class="page-item">
-                                                        <a class="page-link" href="#">Next</a>
-                                                    </li>
+                                        <div class="d-flex">
+                                            <!-- Filter Dropdown -->
+                                            <div class="dropdown me-2">
+                                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" id="filterDropdown" data-bs-toggle="dropdown">
+                                                    <i class="bi bi-filter me-1"></i>Filter
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="filterDropdown">
+                                                    <li><a class="dropdown-item filter-option active" href="#" data-filter="all">
+                                                        <i class="bi bi-list me-2"></i>All Orders
+                                                    </a></li>
+                                                    <li><a class="dropdown-item filter-option" href="#" data-filter="pending">
+                                                        <i class="bi bi-clock me-2"></i>Pending Orders
+                                                    </a></li>
+                                                    <li><a class="dropdown-item filter-option" href="#" data-filter="accepted">
+                                                        <i class="bi bi-check-circle me-2"></i>Accepted Orders
+                                                    </a></li>
+                                                    <li><a class="dropdown-item filter-option" href="#" data-filter="delivered">
+                                                        <i class="bi bi-truck me-2"></i>Delivered Orders
+                                                    </a></li>
+                                                    <li><a class="dropdown-item filter-option" href="#" data-filter="canceled">
+                                                        <i class="bi bi-x-circle me-2"></i>Canceled Orders
+                                                    </a></li>
                                                 </ul>
-                                            </nav>
+                                            </div>
+                                            
+                                            <!-- Export Dropdown -->
+                                            <div class="dropdown">
+                                                <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="exportDropdown" data-bs-toggle="dropdown">
+                                                    <i class="bi bi-download me-1"></i>Export
+                                                </button>
+                                                <ul class="dropdown-menu" aria-labelledby="exportDropdown">
+                                                    <li><h6 class="dropdown-header">Export All Orders</h6></li>
+                                                    <li><a class="dropdown-item" href="/farmer/export/orders?format=csv">
+                                                        <i class="bi bi-filetype-csv me-2"></i>Export as CSV
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="/farmer/export/orders?format=pdf">
+                                                        <i class="bi bi-filetype-txt me-2"></i>Export as Text
+                                                    </a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><h6 class="dropdown-header">Export by Status</h6></li>
+                                                    <li><a class="dropdown-item" href="/farmer/export/orders?format=csv&status=Pending">
+                                                        <i class="bi bi-clock me-2"></i>Pending Orders (CSV)
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="/farmer/export/orders?format=csv&status=Processing">
+                                                        <i class="bi bi-gear me-2"></i>Processing Orders (CSV)
+                                                    </a></li>
+                                                    <li><a class="dropdown-item" href="/farmer/export/orders?format=csv&status=Delivered">
+                                                        <i class="bi bi-check-circle me-2"></i>Delivered Orders (CSV)
+                                                    </a></li>
+                                                </ul>
+                                            </div>
                                         </div>
                                     </div>
+
+                                    <!-- Order Status Tabs -->
+                                    <ul class="nav nav-tabs mt-3" id="orderTabs" role="tablist">
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link active" id="pending-tab" data-bs-toggle="tab" data-bs-target="#pending-orders" type="button" role="tab">
+                                                <i class="bi bi-clock me-1"></i>Pending 
+                                                <span class="badge bg-warning text-dark ms-1" th:text="${pendingOrdersCount}">0</span>
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="accepted-tab" data-bs-toggle="tab" data-bs-target="#accepted-orders" type="button" role="tab">
+                                                <i class="bi bi-check-circle me-1"></i>Accepted 
+                                                <span class="badge bg-info ms-1" th:text="${processingOrdersCount}">0</span>
+                                            </button>
+                                        </li>
+                                        <li class="nav-item" role="presentation">
+                                            <button class="nav-link" id="delivered-tab" data-bs-toggle="tab" data-bs-target="#delivered-orders" type="button" role="tab">
+                                                <i class="bi bi-truck me-1"></i>Delivered 
+                                                <span class="badge bg-success ms-1" th:text="${deliveredOrdersCount}">0</span>
+                                            </button>
+                                        </li>
+                                    </ul>
                                 </div>
-                            </div>                        </section>
+
+                                <div class="card-body p-0">
+                                    <div class="tab-content" id="orderTabContent">
+                                        <!-- Pending Orders Tab -->
+                                        <div class="tab-pane fade show active" id="pending-orders" role="tabpanel">
+                                            <div th:if="${pendingOrderRequests != null and !pendingOrderRequests.isEmpty()}">
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-order-requests mb-0">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th scope="col"><i class="bi bi-hash me-1"></i>Order ID</th>
+                                                                <th scope="col"><i class="bi bi-person me-1"></i>Customer</th>
+                                                                <th scope="col"><i class="bi bi-geo-alt me-1"></i>Delivery Address</th>
+                                                                <th scope="col"><i class="bi bi-box-seam me-1"></i>Products</th>
+                                                                <th scope="col"><i class="bi bi-currency-dollar me-1"></i>Amount</th>
+                                                                <th scope="col" class="text-center"><i class="bi bi-gear me-1"></i>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>                                                            <tr th:each="order : ${pendingOrderRequests}" class="order-row" 
+                                                                th:data-order-id="${order.orderId}" 
+                                                                th:data-customer="${order.buyerId}">
+                                                                <td>
+                                                                    <span class="fw-bold text-primary" th:text="'#' + ${#strings.abbreviate(order.orderId, 12)}"></span>
+                                                                    <small class="d-block text-muted" th:text="${#strings.substring(order.orderDate, 0, 10)}">Date</small>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <i class="bi bi-person-circle text-secondary me-2"></i>
+                                                                        <div>
+                                                                            <div class="fw-semibold" th:text="${order.buyerId}">Customer</div>
+                                                                            <small class="text-muted">Verified Buyer</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                                                    <span th:text="${order.deliveryAddress}" th:title="${order.deliveryAddress}">Address</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span th:text="${order.itemNames != null ? order.itemNames.toString().replace('[','').replace(']','') : 'No items'}">Products</span>
+                                                                    <small class="d-block text-muted">
+                                                                        <span th:text="${order.itemNames != null ? order.itemNames.size() : 0}">0</span> item(s)
+                                                                    </small>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="fw-bold text-success" th:text="'₱' + ${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <button class="btn btn-sm btn-outline-info me-1" 
+                                                                            data-bs-toggle="modal" 
+                                                                            data-bs-target="#orderDetailsModal"
+                                                                            th:data-order-id="${order.orderId}"
+                                                                            title="View Details">
+                                                                        <i class="bi bi-eye"></i>
+                                                                    </button>                                                                    <button class="btn btn-sm btn-success me-1 accept-order-btn" 
+                                                                            th:data-order-id="${order.orderId}"
+                                                                            title="Accept Order">
+                                                                        <i class="bi bi-check-lg me-1"></i>Accept
+                                                                    </button>                                                                    <button class="btn btn-sm btn-danger reject-order-btn" 
+                                                                            th:data-order-id="${order.orderId}"
+                                                                            title="Reject Order">
+                                                                        <i class="bi bi-x-lg me-1"></i>Reject
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div th:if="${pendingOrderRequests == null or pendingOrderRequests.isEmpty()}" class="text-center py-5">
+                                                <i class="bi bi-clock-history text-muted" style="font-size: 3rem;"></i>
+                                                <h5 class="text-muted mt-3">No Pending Orders</h5>
+                                                <p class="text-muted">You currently have no pending orders waiting for your response.</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Accepted Orders Tab -->
+                                        <div class="tab-pane fade" id="accepted-orders" role="tabpanel">
+                                            <div th:if="${acceptedOrderRequests != null and !acceptedOrderRequests.isEmpty()}">
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-order-requests mb-0">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th scope="col"><i class="bi bi-hash me-1"></i>Order ID</th>
+                                                                <th scope="col"><i class="bi bi-person me-1"></i>Customer</th>
+                                                                <th scope="col"><i class="bi bi-geo-alt me-1"></i>Delivery Address</th>
+                                                                <th scope="col"><i class="bi bi-box-seam me-1"></i>Products</th>
+                                                                <th scope="col"><i class="bi bi-currency-dollar me-1"></i>Amount</th>
+                                                                <th scope="col"><i class="bi bi-clock me-1"></i>Accepted Date</th>
+                                                                <th scope="col" class="text-center"><i class="bi bi-gear me-1"></i>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr th:each="order : ${acceptedOrderRequests}" class="order-row bg-light-info">
+                                                                <td>
+                                                                    <span class="fw-bold text-primary" th:text="'#' + ${#strings.abbreviate(order.orderId, 12)}"></span>
+                                                                    <small class="d-block text-muted" th:text="${#strings.substring(order.orderDate, 0, 10)}">Date</small>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <i class="bi bi-person-circle text-secondary me-2"></i>
+                                                                        <div>
+                                                                            <div class="fw-semibold" th:text="${order.buyerId}">Customer</div>
+                                                                            <small class="text-muted">Verified Buyer</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <i class="bi bi-geo-alt-fill text-danger me-1"></i>
+                                                                    <span th:text="${order.deliveryAddress}" th:title="${order.deliveryAddress}">Address</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span th:text="${order.itemNames != null ? order.itemNames.toString().replace('[','').replace(']','') : 'No items'}">Products</span>
+                                                                    <small class="d-block text-muted">
+                                                                        <span th:text="${order.itemNames != null ? order.itemNames.size() : 0}">0</span> item(s)
+                                                                    </small>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="fw-bold text-success" th:text="'₱' + ${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="badge bg-info text-white">
+                                                                        <i class="bi bi-check-circle me-1"></i>Accepted
+                                                                    </span>
+                                                                    <small class="d-block text-muted" th:text="${order.acceptedDate != null ? #strings.substring(order.acceptedDate, 0, 10) : 'Recently'}">Date</small>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <button class="btn btn-sm btn-outline-info me-1" 
+                                                                            data-bs-toggle="modal" 
+                                                                            data-bs-target="#orderDetailsModal"
+                                                                            th:data-order-id="${order.orderId}"
+                                                                            title="View Details">
+                                                                        <i class="bi bi-eye"></i>
+                                                                    </button>
+                                                                    <button class="btn btn-sm btn-outline-primary me-1" 
+                                                                            data-bs-toggle="tooltip" title="Contact Customer"
+                                                                            onclick="contactCustomer()">
+                                                                        <i class="bi bi-chat-dots"></i>
+                                                                    </button>                                                                    <button class="btn btn-sm btn-outline-success deliver-order-btn" 
+                                                                            th:data-order-id="${order.orderId}"
+                                                                            title="Mark as Delivered">
+                                                                        <i class="bi bi-truck me-1"></i>Deliver
+                                                                    </button>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div th:if="${acceptedOrderRequests == null or acceptedOrderRequests.isEmpty()}" class="text-center py-5">
+                                                <i class="bi bi-check-circle text-muted" style="font-size: 3rem;"></i>
+                                                <h5 class="text-muted mt-3">No Accepted Orders</h5>
+                                                <p class="text-muted">You haven't accepted any orders yet. Accepted orders will appear here.</p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Delivered Orders Tab -->
+                                        <div class="tab-pane fade" id="delivered-orders" role="tabpanel">
+                                            <div th:if="${deliveredOrderRequests != null and !deliveredOrderRequests.isEmpty()}">
+                                                <div class="table-responsive">
+                                                    <table class="table table-hover table-order-requests mb-0">
+                                                        <thead class="table-light">
+                                                            <tr>
+                                                                <th scope="col"><i class="bi bi-hash me-1"></i>Order ID</th>
+                                                                <th scope="col"><i class="bi bi-person me-1"></i>Customer</th>
+                                                                <th scope="col"><i class="bi bi-box-seam me-1"></i>Products</th>
+                                                                <th scope="col"><i class="bi bi-currency-dollar me-1"></i>Amount</th>
+                                                                <th scope="col"><i class="bi bi-truck me-1"></i>Delivered Date</th>
+                                                                <th scope="col" class="text-center"><i class="bi bi-gear me-1"></i>Actions</th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            <tr th:each="order : ${deliveredOrderRequests}" class="order-row bg-light-success">
+                                                                <td>
+                                                                    <span class="fw-bold text-primary" th:text="'#' + ${#strings.abbreviate(order.orderId, 12)}"></span>
+                                                                    <small class="d-block text-muted" th:text="${#strings.substring(order.orderDate, 0, 10)}">Date</small>
+                                                                </td>
+                                                                <td>
+                                                                    <div class="d-flex align-items-center">
+                                                                        <i class="bi bi-person-circle text-secondary me-2"></i>
+                                                                        <div>
+                                                                            <div class="fw-semibold" th:text="${order.buyerId}">Customer</div>
+                                                                            <small class="text-muted">Verified Buyer</small>
+                                                                        </div>
+                                                                    </div>
+                                                                </td>
+                                                                <td>
+                                                                    <span th:text="${order.itemNames != null ? order.itemNames.toString().replace('[','').replace(']','') : 'No items'}">Products</span>
+                                                                    <small class="d-block text-muted">
+                                                                        <span th:text="${order.itemNames != null ? order.itemNames.size() : 0}">0</span> item(s)
+                                                                    </small>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="fw-bold text-success" th:text="'₱' + ${#numbers.formatDecimal(order.totalAmount, 1, 'COMMA', 2, 'POINT')}">₱0.00</span>
+                                                                </td>
+                                                                <td>
+                                                                    <span class="badge bg-success">
+                                                                        <i class="bi bi-truck me-1"></i>Delivered
+                                                                    </span>
+                                                                    <small class="d-block text-muted" th:text="${order.deliveredDate != null ? #strings.substring(order.deliveredDate, 0, 10) : 'Recently'}">Date</small>
+                                                                </td>
+                                                                <td class="text-center">
+                                                                    <button class="btn btn-sm btn-outline-info me-1" 
+                                                                            data-bs-toggle="modal" 
+                                                                            data-bs-target="#orderDetailsModal"
+                                                                            th:data-order-id="${order.orderId}"
+                                                                            title="View Details">
+                                                                        <i class="bi bi-eye"></i>
+                                                                    </button>
+                                                                    <span class="badge bg-light text-muted">
+                                                                        <i class="bi bi-check-circle me-1"></i>Completed
+                                                                    </span>
+                                                                </td>
+                                                            </tr>
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            </div>
+                                            <div th:if="${deliveredOrderRequests == null or deliveredOrderRequests.isEmpty()}" class="text-center py-5">
+                                                <i class="bi bi-truck text-muted" style="font-size: 3rem;"></i>
+                                                <h5 class="text-muted mt-3">No Delivered Orders</h5>
+                                                <p class="text-muted">Completed deliveries will appear here for your records.</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>                            </div></section>
                     </div>
                 </div>
             </main>
@@ -320,10 +517,21 @@
                                 <tr>
                                     <td class="fw-semibold">Status:</td>
                                     <td><span id="modalOrderStatus" class="badge bg-warning">Pending</span></td>
-                                </tr>
-                                <tr>
+                                </tr>                                <tr>
                                     <td class="fw-semibold">Total Amount:</td>
                                     <td class="text-success fw-bold" id="modalTotalAmount">₱0.00</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold">Delivery Option:</td>
+                                    <td id="modalDeliveryOption">Standard</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold">Payment Method:</td>
+                                    <td id="modalPaymentMethod">Not specified</td>
+                                </tr>
+                                <tr>
+                                    <td class="fw-semibold">Priority:</td>
+                                    <td><span id="modalOrderPriority" class="badge bg-secondary">Normal</span></td>
                                 </tr>
                             </table>
                         </div>
@@ -495,28 +703,143 @@
     <script th:src="@{/js/dashboard.js}"></script>
     
     <!-- Enhanced Order Table JavaScript -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
+    <script>        document.addEventListener('DOMContentLoaded', function() {
+            // Check for success/error messages in URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const success = urlParams.get('success');
+            const error = urlParams.get('error');
+            
+            if (success) {
+                let message = '';
+                switch(success) {
+                    case 'order_accepted':
+                        message = 'Order has been accepted successfully!';
+                        break;
+                    case 'order_rejected':
+                        message = 'Order has been rejected.';
+                        break;
+                    case 'order_delivered':
+                        message = 'Order has been marked as delivered!';
+                        break;
+                    default:
+                        message = 'Operation completed successfully!';
+                }
+                showToast('Success', message, 'success');
+            }
+              if (error) {
+                let message = '';
+                switch(error) {
+                    case 'accept_failed':
+                        message = 'Failed to accept order. Please try again.';
+                        break;
+                    case 'reject_failed':
+                        message = 'Failed to reject order. Please try again.';
+                        break;
+                    case 'deliver_failed':
+                        message = 'Failed to mark order as delivered. Please try again.';
+                        break;
+                    case 'invalid_order_id':
+                        message = 'Invalid order ID. Please refresh the page and try again.';
+                        break;
+                    default:
+                        message = 'An error occurred. Please try again.';
+                }
+                showToast('Error', message, 'error');
+            }
+            
+            // Add event listeners for order action buttons
+            document.addEventListener('click', function(e) {
+                // Handle Accept Order buttons
+                if (e.target.closest('.accept-order-btn')) {
+                    e.preventDefault();
+                    const button = e.target.closest('.accept-order-btn');
+                    const orderId = button.getAttribute('data-order-id');
+                    console.log('Accept button clicked for order:', orderId);
+                    
+                    if (orderId) {
+                        showAcceptModal(orderId);
+                    } else {
+                        console.error('No order ID found on accept button');
+                        showToast('Error', 'Order ID not found. Please refresh the page and try again.', 'error');
+                    }
+                }
+                
+                // Handle Reject Order buttons
+                if (e.target.closest('.reject-order-btn')) {
+                    e.preventDefault();
+                    const button = e.target.closest('.reject-order-btn');
+                    const orderId = button.getAttribute('data-order-id');
+                    console.log('Reject button clicked for order:', orderId);
+                    
+                    if (orderId) {
+                        showRejectModal(orderId);
+                    } else {
+                        console.error('No order ID found on reject button');
+                        showToast('Error', 'Order ID not found. Please refresh the page and try again.', 'error');
+                    }
+                }
+                
+                // Handle Deliver Order buttons
+                if (e.target.closest('.deliver-order-btn')) {
+                    e.preventDefault();
+                    const button = e.target.closest('.deliver-order-btn');
+                    const orderId = button.getAttribute('data-order-id');
+                    console.log('Deliver button clicked for order:', orderId);
+                    
+                    if (orderId) {
+                        showDeliveryModal(orderId);
+                    } else {
+                        console.error('No order ID found on deliver button');
+                        showToast('Error', 'Order ID not found. Please refresh the page and try again.', 'error');
+                    }
+                }
+            });
+            
+            // Format ISO dates
+            function formatISODate(isoString) {
+                try {
+                    const date = new Date(isoString);
+                    return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: '2-digit'
+                    });
+                } catch (error) {
+                    console.error('Error formatting date:', error);
+                    return isoString.substring(0, 10); // fallback to YYYY-MM-DD
+                }
+            }
+            
+            // Format all date displays
+            const dateDisplays = document.querySelectorAll('.date-display');
+            dateDisplays.forEach(function(display) {
+                const isoDate = display.getAttribute('data-iso-date');
+                if (isoDate) {
+                    display.textContent = formatISODate(isoDate);
+                }
+            });
+            
             // Initialize tooltips
             var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
             var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
                 return new bootstrap.Tooltip(tooltipTriggerEl);
             });
-            
-            // Order search functionality
+              // Order search functionality
             const orderSearch = document.getElementById('orderSearch');
-            const orderTableBody = document.getElementById('orderTableBody');
-            const orderRows = orderTableBody.querySelectorAll('.order-row');
-            const emptyState = document.getElementById('emptyState');
-            const orderCount = document.getElementById('orderCount');
+            
+            // Get all order rows from all tabs
+            function getAllOrderRows() {
+                return document.querySelectorAll('.order-row');
+            }
             
             function updateOrderCount() {
-                const visibleRows = orderTableBody.querySelectorAll('.order-row:not(.empty-state-hidden)');
-                orderCount.textContent = visibleRows.length;
-                  if (visibleRows.length === 0) {
-                    emptyState.classList.remove('empty-state-hidden');
-                } else {
-                    emptyState.classList.add('empty-state-hidden');
+                const allRows = getAllOrderRows();
+                const visibleRows = Array.from(allRows).filter(row => !row.classList.contains('empty-state-hidden'));
+                
+                // Update order count if element exists
+                const orderCount = document.getElementById('orderCount');
+                if (orderCount) {
+                    orderCount.textContent = visibleRows.length;
                 }
             }
             
@@ -524,12 +847,13 @@
                 orderSearch.addEventListener('input', function() {
                     const searchTerm = this.value.toLowerCase();
                     
-                    orderRows.forEach(row => {
-                        const orderId = row.getAttribute('data-order-id').toLowerCase();
-                        const customer = row.getAttribute('data-customer').toLowerCase();
-                        const productCell = row.querySelector('.product-names');
+                    getAllOrderRows().forEach(row => {
+                        const orderId = row.getAttribute('data-order-id')?.toLowerCase() || '';
+                        const customer = row.getAttribute('data-customer')?.toLowerCase() || '';
+                        const productCell = row.querySelector('.product-names, [th\\:text*="itemNames"]');
                         const products = productCell ? productCell.textContent.toLowerCase() : '';
-                          if (orderId.includes(searchTerm) || 
+                        
+                        if (orderId.includes(searchTerm) || 
                             customer.includes(searchTerm) || 
                             products.includes(searchTerm)) {
                             row.classList.remove('empty-state-hidden');
@@ -542,40 +866,39 @@
                 });
             }
             
-            // Filter functionality
+            // Filter functionality - now works with tabs
             const filterOptions = document.querySelectorAll('.filter-option');
             filterOptions.forEach(option => {
                 option.addEventListener('click', function(e) {
                     e.preventDefault();
                     const filter = this.getAttribute('data-filter');
                     
-                    orderRows.forEach(row => {
-                        const status = row.getAttribute('data-status').toLowerCase();
-                          if (filter === 'all' || status === filter) {
-                            row.classList.remove('empty-state-hidden');
-                        } else {
-                            row.classList.add('empty-state-hidden');
-                        }
-                    });
+                    // Instead of filtering rows, switch to appropriate tab
+                    if (filter === 'pending') {
+                        document.getElementById('pending-tab').click();
+                    } else if (filter === 'accepted' || filter === 'processing') {
+                        document.getElementById('accepted-tab').click();
+                    } else if (filter === 'delivered') {
+                        document.getElementById('delivered-tab').click();
+                    }
                     
                     updateOrderCount();
-                    
-                    // Update dropdown button text
-                    const dropdownButton = document.getElementById('orderFilterDropdown');
-                    const icon = this.querySelector('i').className;
-                    const text = this.textContent.trim();
-                    dropdownButton.innerHTML = `<i class="${icon} me-1"></i>${text}`;
                 });
-            });
-            
-            // Sorting functionality
+            });            
+            // Sorting functionality - updated for tabbed interface
             const sortableHeaders = document.querySelectorAll('.sortable');
             let currentSort = { column: null, direction: 'asc' };
             
             sortableHeaders.forEach(header => {
                 header.addEventListener('click', function() {
                     const column = this.getAttribute('data-sort');
-                    const rows = Array.from(orderTableBody.querySelectorAll('.order-row'));
+                    // Get the current active tab's table body
+                    const activeTab = document.querySelector('.tab-pane.active');
+                    const tableBody = activeTab ? activeTab.querySelector('tbody') : null;
+                    
+                    if (!tableBody) return;
+                    
+                    const rows = Array.from(tableBody.querySelectorAll('.order-row'));
                     
                     // Toggle sort direction
                     if (currentSort.column === column) {
@@ -620,83 +943,371 @@
                         if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
                         return 0;
                     });
-                    
-                    // Reorder DOM elements
-                    rows.forEach(row => orderTableBody.appendChild(row));
+                      // Reorder DOM elements
+                    rows.forEach(row => tableBody.appendChild(row));
                 });
             });
-            
-            // Order details modal functionality
+              // Order details modal functionality
             const orderDetailsModal = document.getElementById('orderDetailsModal');
             if (orderDetailsModal) {
                 orderDetailsModal.addEventListener('show.bs.modal', function(event) {
                     const button = event.relatedTarget;
                     const orderId = button.getAttribute('data-order-id');
-                    const row = document.querySelector(`[data-order-id="${orderId}"]`);
                     
-                    if (row) {
-                        // Populate modal with order data
-                        document.getElementById('modalOrderId').textContent = '#' + orderId;
-                        document.getElementById('modalCustomerName').textContent = row.getAttribute('data-customer');
-                        document.getElementById('modalDeliveryAddress').textContent = row.querySelector('.address-cell span').textContent;
+                    if (orderId) {
+                        // Show loading state
+                        showLoadingState();
                         
-                        // Set status badge
-                        const status = row.getAttribute('data-status');
-                        const modalStatus = document.getElementById('modalOrderStatus');
-                        modalStatus.textContent = status;
-                        modalStatus.className = `badge ${getStatusBadgeClass(status)}`;
-                        
-                        // Set amount
-                        const amount = row.querySelector('.amount-cell .fw-bold').textContent;
-                        document.getElementById('modalTotalAmount').textContent = amount;
-                        
-                        // Update modal actions based on status
-                        updateModalActions(status, orderId);
+                        // Fetch detailed order information from backend
+                        fetchOrderDetails(orderId);
                     }
                 });
             }
-            
-            function getStatusBadgeClass(status) {
-                switch(status.toLowerCase()) {
-                    case 'pending': return 'bg-warning text-dark';
-                    case 'accepted': return 'bg-info text-white';
-                    case 'delivered': return 'bg-success';
-                    case 'canceled': return 'bg-danger';
-                    default: return 'bg-secondary';
-                }
+              // Function to show loading state in modal
+            function showLoadingState() {
+                document.getElementById('modalOrderId').textContent = 'Loading...';
+                document.getElementById('modalOrderDate').textContent = 'Loading...';
+                document.getElementById('modalOrderStatus').innerHTML = '<span class="badge bg-secondary">Loading...</span>';
+                document.getElementById('modalTotalAmount').textContent = 'Loading...';
+                document.getElementById('modalDeliveryOption').textContent = 'Loading...';
+                document.getElementById('modalPaymentMethod').textContent = 'Loading...';
+                document.getElementById('modalOrderPriority').innerHTML = '<span class="badge bg-secondary">Loading...</span>';
+                document.getElementById('modalCustomerName').textContent = 'Loading...';
+                document.getElementById('modalCustomerContact').textContent = 'Loading...';
+                document.getElementById('modalCustomerEmail').textContent = 'Loading...';
+                document.getElementById('modalDeliveryAddress').textContent = 'Loading...';
+                document.getElementById('modalOrderItems').innerHTML = '<tr><td colspan="4" class="text-center">Loading order items...</td></tr>';
             }
             
-            function updateModalActions(status, orderId) {
-                const modalActions = document.getElementById('modalActions');
-                let actionsHTML = '';
+            // Function to fetch order details from backend
+            async function fetchOrderDetails(orderId) {
+                try {
+                    console.log('Fetching order details for:', orderId);
+                    const response = await fetch(`/farmer/api/order/${orderId}`);
+                    
+                    if (!response.ok) {
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const orderData = await response.json();
+                    console.log('Received order data:', orderData);
+                    populateOrderDetails(orderData);
+                } catch (error) {
+                    console.error('Error fetching order details:', error);
+                    showErrorState();
+                    
+                    // Show user-friendly error message
+                    const errorMessage = error.message || 'Failed to load order details';
+                    showToast('Error', errorMessage, 'error');
+                }
+            }
+
+            // Improved populateOrderDetails function with better error handling
+            function populateOrderDetails(order) {
+                console.log('populateOrderDetails called with:', order);
                 
-                if (status === 'pending') {
-                    actionsHTML = `
-                        <form action="/farmer/order/accept" method="post" class="d-inline me-2">
-                            <input type="hidden" name="orderId" value="${orderId}" />
-                            <button type="submit" class="btn btn-success">
-                                <i class="bi bi-check-lg me-2"></i>Accept Order
-                            </button>
-                        </form>
-                        <form action="/farmer/order/reject" method="post" class="d-inline">
-                            <input type="hidden" name="orderId" value="${orderId}" />
-                            <button type="submit" class="btn btn-danger">
-                                <i class="bi bi-x-lg me-2"></i>Reject Order
-                            </button>
-                        </form>
-                    `;
-                } else if (status === 'accepted') {
-                    actionsHTML = `
-                        <button type="button" class="btn btn-primary me-2">
-                            <i class="bi bi-chat-dots me-2"></i>Contact Customer
-                        </button>
-                        <button type="button" class="btn btn-success">
-                            <i class="bi bi-truck me-2"></i>Mark as Delivered
-                        </button>
-                    `;
+                try {
+                    if (!order) {
+                        throw new Error('Order data is null or undefined');
+                    }
+
+                    // Basic order information with proper null checks and fallbacks
+                    updateElement('modalOrderId', '#' + (order.orderId || 'Unknown'));
+                    updateElement('modalOrderDate', formatDate(order.orderDate) || 'Date not available');
+                    
+                    // Order status
+                    const status = order.status || 'Pending';
+                    updateElement('modalOrderStatus', `<span class="badge ${getStatusBadgeClass(status)}">${status}</span>`, true);
+                    
+                    // Total amount
+                    const amount = order.totalAmount != null ? order.totalAmount : 0;
+                    updateElement('modalTotalAmount', formatCurrency(amount));
+                    
+                    // Additional order information
+                    updateElement('modalDeliveryOption', order.deliveryOption || 'Standard Delivery');
+                    updateElement('modalPaymentMethod', order.paymentMethod || 'Cash on Delivery');
+                    
+                    // Order priority
+                    const priority = order.orderPriority || 'normal';
+                    updateElement('modalOrderPriority', 
+                        `<span class="badge ${getPriorityBadgeClass(priority)}">${formatPriority(priority)}</span>`, true);
+                    
+                    // Customer information
+                    updateElement('modalCustomerName', order.customerName || order.buyerId || 'Customer');
+                    updateElement('modalCustomerContact', order.customerContact || 'Contact not available');
+                    updateElement('modalCustomerEmail', order.customerEmail || 'Email not available');
+                    
+                    // Delivery address
+                    updateElement('modalDeliveryAddress', order.deliveryAddress || 'Delivery address not provided');
+                    
+                    // Order items
+                    populateOrderItems(order);
+                    
+                    // Order timeline
+                    populateOrderTimeline(order);
+                    
+                    // Update modal actions
+                    updateModalActions(status, order.orderId);
+                    
+                } catch (error) {
+                    console.error('Error populating order details:', error);
+                    showModalError('Failed to display order details. Please try again.');
+                }
+            }
+
+            // Helper function to safely update DOM elements
+            function updateElement(elementId, content, isHTML = false) {
+                try {
+                    const element = document.getElementById(elementId);
+                    if (element) {
+                        if (isHTML) {
+                            element.innerHTML = content;
+                        } else {
+                            element.textContent = content;
+                        }
+                    } else {
+                        console.warn(`Element with ID '${elementId}' not found`);
+                    }
+                } catch (error) {
+                    console.error(`Error updating element ${elementId}:`, error);
+                }
+            }
+
+            // Improved populateOrderItems with better error handling
+            function populateOrderItems(order) {
+                console.log('populateOrderItems called with order:', order);
+                const orderItemsContainer = document.getElementById('modalOrderItems');
+                
+                if (!orderItemsContainer) {
+                    console.error('modalOrderItems container not found!');
+                    return;
                 }
                 
-                modalActions.innerHTML = actionsHTML;
+                try {
+                    orderItemsContainer.innerHTML = '';
+                    
+                    if (order && order.itemNames && Array.isArray(order.itemNames) && order.itemNames.length > 0) {
+                        console.log('Order has', order.itemNames.length, 'items');
+                        
+                        for (let i = 0; i < order.itemNames.length; i++) {
+                            const itemName = order.itemNames[i] || 'Unknown Item';
+                            const quantity = (order.quantities && order.quantities[i]) ? order.quantities[i] : 1;
+                            
+                            // Calculate pricing (simplified approach)
+                            const itemTotal = (order.totalAmount && order.itemNames.length > 0) ? 
+                                (order.totalAmount / order.itemNames.length) : 0;
+                            const unitPrice = (quantity > 0) ? itemTotal / quantity : itemTotal;
+                            
+                            const row = document.createElement('tr');
+                            const quantityDisplay = `${quantity} ${getQuantityUnit(quantity)}`;
+                            
+                            row.innerHTML = `
+                                <td>${escapeHtml(itemName)}</td>
+                                <td>${quantityDisplay}</td>
+                                <td>${safeFormatCurrency(unitPrice)}</td>
+                                <td>${safeFormatCurrency(itemTotal)}</td>
+                            `;
+                            orderItemsContainer.appendChild(row);
+                        }
+                        
+                        // Add total row
+                        const totalRow = document.createElement('tr');
+                        totalRow.innerHTML = `
+                            <td colspan="3" class="text-end fw-bold">Total Amount:</td>
+                            <td class="fw-bold text-success">${safeFormatCurrency(order.totalAmount || 0)}</td>
+                        `;
+                        totalRow.classList.add('table-success');
+                        orderItemsContainer.appendChild(totalRow);
+                    } else {
+                        console.log('No items found in order');
+                        orderItemsContainer.innerHTML = '<tr><td colspan="4" class="text-center text-muted">No items found for this order</td></tr>';
+                    }
+                } catch (error) {
+                    console.error('Error in populateOrderItems:', error);
+                    orderItemsContainer.innerHTML = '<tr><td colspan="4" class="text-center text-danger">Failed to load order items</td></tr>';
+                }
+            }
+
+            // Helper function to show toast notifications
+            function showToast(title, message, type = 'info') {
+                // Create toast if it doesn't exist
+                let toastContainer = document.getElementById('toastContainer');
+                if (!toastContainer) {
+                    toastContainer = document.createElement('div');
+                    toastContainer.id = 'toastContainer';
+                    toastContainer.className = 'toast-container position-fixed top-0 end-0 p-3';
+                    toastContainer.style.zIndex = '1100';
+                    document.body.appendChild(toastContainer);
+                }
+                
+                const toastId = 'toast-' + Date.now();
+                const bgClass = type === 'error' ? 'bg-danger' : type === 'success' ? 'bg-success' : 'bg-primary';
+                
+                const toastHTML = `
+                    <div id="${toastId}" class="toast ${bgClass} text-white" role="alert" aria-live="assertive" aria-atomic="true">
+                        <div class="toast-header ${bgClass} text-white border-0">
+                            <strong class="me-auto">${title}</strong>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="Close"></button>
+                        </div>
+                        <div class="toast-body">
+                            ${message}
+                        </div>
+                    </div>
+                `;
+                
+                toastContainer.insertAdjacentHTML('beforeend', toastHTML);
+                
+                const toastElement = document.getElementById(toastId);
+                const toast = new bootstrap.Toast(toastElement);
+                toast.show();
+                
+                // Remove toast element after it's hidden
+                toastElement.addEventListener('hidden.bs.toast', () => {
+                    toastElement.remove();
+                });
+            }            // Modal functions for enhanced order processing
+            function showAcceptModal(orderId) {
+                console.log('showAcceptModal called with orderId:', orderId);
+                
+                if (!orderId) {
+                    console.error('Order ID is null or undefined');
+                    showToast('Error', 'Order ID is missing. Please refresh the page and try again.', 'error');
+                    return;
+                }
+                
+                // Clean the orderId if it has any extra characters
+                orderId = orderId.toString().trim();
+                
+                const modal = new bootstrap.Modal(document.getElementById('acceptOrderModal'));
+                const orderIdInput = document.getElementById('acceptOrderId');
+                
+                if (orderIdInput) {
+                    orderIdInput.value = orderId;
+                    console.log('Set acceptOrderId input value to:', orderId);
+                } else {
+                    console.error('acceptOrderId input element not found');
+                    showToast('Error', 'Modal form not found. Please refresh the page.', 'error');
+                    return;
+                }
+                
+                // Clear previous form data
+                const estimatedDeliveryTime = document.getElementById('estimatedDeliveryTime');
+                const farmerAcceptNotes = document.getElementById('farmerAcceptNotes');
+                
+                if (estimatedDeliveryTime) estimatedDeliveryTime.value = '';
+                if (farmerAcceptNotes) farmerAcceptNotes.value = '';
+                
+                modal.show();
+            }            function showRejectModal(orderId) {
+                console.log('showRejectModal called with orderId:', orderId);
+                
+                if (!orderId) {
+                    console.error('Order ID is null or undefined');
+                    showToast('Error', 'Order ID is missing. Please refresh the page and try again.', 'error');
+                    return;
+                }
+                
+                // Clean the orderId if it has any extra characters
+                orderId = orderId.toString().trim();
+                
+                const modal = new bootstrap.Modal(document.getElementById('rejectOrderModal'));
+                const orderIdInput = document.getElementById('rejectOrderId');
+                
+                if (orderIdInput) {
+                    orderIdInput.value = orderId;
+                    console.log('Set rejectOrderId input value to:', orderId);
+                } else {
+                    console.error('rejectOrderId input element not found');
+                    showToast('Error', 'Modal form not found. Please refresh the page.', 'error');
+                    return;
+                }
+                
+                // Clear previous form data
+                const rejectionReason = document.getElementById('rejectionReason');
+                if (rejectionReason) rejectionReason.value = '';
+                
+                modal.show();
+            }function showDeliveryModal(orderId) {
+                console.log('showDeliveryModal called with orderId:', orderId);
+                
+                if (!orderId) {
+                    console.error('Order ID is null or undefined');
+                    showToast('Error', 'Order ID is missing. Please refresh the page and try again.', 'error');
+                    return;
+                }
+                
+                // Clean the orderId if it has any extra characters
+                orderId = orderId.toString().trim();
+                
+                const modal = new bootstrap.Modal(document.getElementById('deliveryModal'));
+                const orderIdInput = document.getElementById('deliveryOrderId');
+                
+                if (orderIdInput) {
+                    orderIdInput.value = orderId;
+                    console.log('Set deliveryOrderId input value to:', orderId);
+                } else {
+                    console.error('deliveryOrderId input element not found');
+                    showToast('Error', 'Modal form not found. Please refresh the page.', 'error');
+                    return;
+                }
+                
+                // Clear previous form data
+                const deliveryNotes = document.getElementById('deliveryNotes');
+                if (deliveryNotes) deliveryNotes.value = '';
+                
+                modal.show();            }
+            
+            // Function to contact customer
+            function contactCustomer() {
+                // In a real application, this would open a chat interface or redirect to messaging
+                alert('Contact customer feature would open here. This could integrate with your messaging system.');
+                console.log('Contact customer clicked');
+            }              // Add form validation for accept order form
+            const acceptOrderForm = document.getElementById('acceptOrderForm');
+            if (acceptOrderForm) {
+                acceptOrderForm.addEventListener('submit', function(e) {
+                    console.log('=== FORM SUBMISSION DEBUG ===');
+                    const orderIdInput = document.getElementById('acceptOrderId');
+                    const formData = new FormData(this);
+                    
+                    // Validate orderId before submission
+                    if (!orderIdInput || !orderIdInput.value || orderIdInput.value.trim() === '') {
+                        e.preventDefault();
+                        console.error('Form submission prevented: Order ID is missing');
+                        showToast('Error', 'Order ID is missing. Please close the modal and try again.', 'error');
+                        return false;
+                    }
+                    
+                    // Log all form data
+                    console.log('Form data:');
+                    for (let [key, value] of formData.entries()) {
+                        console.log(`  ${key}: "${value}"`);
+                    }
+                    
+                    console.log('OrderId input element:', orderIdInput);
+                    console.log('OrderId input value:', orderIdInput ? orderIdInput.value : 'INPUT NOT FOUND');
+                    
+                    // Show loading state on submit button
+                    const submitBtn = document.getElementById('acceptOrderSubmitBtn');
+                    if (submitBtn) {
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i>Processing...';
+                    }
+                    
+                    console.log('Form submission proceeding...');
+                    return true;
+                    
+                    if (!orderIdInput || !orderIdInput.value || orderIdInput.value.trim() === '') {
+                        e.preventDefault();
+                        console.error('BLOCKING FORM SUBMISSION: Order ID is empty');
+                        alert('Error: Order ID is missing. Please close this modal and try again.');
+                        return false;
+                    }
+                    
+                    console.log('Form validation passed, submitting with orderId:', orderIdInput.value);
+                    console.log('=============================');
+                });
             }
             
             // Refresh orders functionality
@@ -733,8 +1344,459 @@
                 0% { transform: rotate(0deg); }
                 100% { transform: rotate(360deg); }
             }
-        `;
-        document.head.appendChild(style);
+        `;        document.head.appendChild(style);
     </script>
+
+    <!-- Enhanced Order Action Modals -->
+    
+    <!-- Accept Order Modal -->
+    <div class="modal fade" id="acceptOrderModal" tabindex="-1" aria-labelledby="acceptOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="acceptOrderModalLabel">
+                        <i class="bi bi-check-circle text-success me-2"></i>Accept Order
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>                <form action="/farmer/order/accept" method="post" id="acceptOrderForm">
+                    <div class="modal-body">
+                        <input type="hidden" name="orderId" id="acceptOrderId" />
+                        
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle me-2"></i>
+                            By accepting this order, you commit to fulfilling it according to the customer's requirements.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="estimatedDeliveryTime" class="form-label">
+                                <i class="bi bi-clock me-1"></i>Estimated Delivery Time
+                            </label>
+                            <input type="text" class="form-control" name="estimatedDeliveryTime" id="estimatedDeliveryTime" 
+                                   placeholder="e.g., 2-3 days, Within a week, etc.">
+                            <div class="form-text">Provide an estimated timeframe for delivery to set customer expectations.</div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="farmerAcceptNotes" class="form-label">
+                                <i class="bi bi-chat-text me-1"></i>Notes to Customer (Optional)
+                            </label>
+                            <textarea class="form-control" name="farmerNotes" id="farmerAcceptNotes" rows="3" 
+                                      placeholder="Any special instructions or information for the customer..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success" id="acceptOrderSubmitBtn">
+                            <i class="bi bi-check-lg me-2"></i>Accept Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reject Order Modal -->
+    <div class="modal fade" id="rejectOrderModal" tabindex="-1" aria-labelledby="rejectOrderModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="rejectOrderModalLabel">
+                        <i class="bi bi-x-circle text-danger me-2"></i>Reject Order
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/farmer/order/reject" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="orderId" id="rejectOrderId" />
+                        
+                        <div class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            Please provide a reason for rejecting this order. This helps maintain transparency with the customer.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="rejectionReason" class="form-label">
+                                <i class="bi bi-chat-text me-1"></i>Reason for Rejection <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" name="rejectionReason" id="rejectionReason" rows="4" required
+                                      placeholder="Please explain why you cannot fulfill this order..."></textarea>
+                        </div>
+                        
+                        <div class="form-text">
+                            Common reasons: Out of stock, Quality concerns, Unable to meet delivery requirements, etc.
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-x-lg me-2"></i>Reject Order
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mark as Delivered Modal -->
+    <div class="modal fade" id="deliveryModal" tabindex="-1" aria-labelledby="deliveryModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="deliveryModalLabel">
+                        <i class="bi bi-truck text-success me-2"></i>Mark Order as Delivered
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="/farmer/order/deliver" method="post">
+                    <div class="modal-body">
+                        <input type="hidden" name="orderId" id="deliveryOrderId" />
+                        
+                        <div class="alert alert-success">
+                            <i class="bi bi-check-circle me-2"></i>
+                            Confirm that this order has been successfully delivered to the customer.
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="deliveryNotes" class="form-label">
+                                <i class="bi bi-chat-text me-1"></i>Delivery Notes (Optional)
+                            </label>
+                            <textarea class="form-control" name="deliveryNotes" id="deliveryNotes" rows="3" 
+                                      placeholder="Any notes about the delivery process, condition of items, etc."></textarea>
+                        </div>
+                        
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="confirmDelivery" required>
+                            <label class="form-check-label" for="confirmDelivery">
+                                I confirm that this order has been delivered successfully
+                            </label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success">
+                            <i class="bi bi-truck me-2"></i>Mark as Delivered
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>    <!-- Utility functions for order details -->
+    <script>
+        // Utility functions for order details
+            function formatDate(dateString) {
+                if (!dateString) return 'Not specified';
+                try {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                } catch (error) {
+                    return 'Invalid date';
+                }
+            }
+            
+            function formatDateTime(dateString) {
+                if (!dateString) return 'Not specified';
+                try {
+                    const date = new Date(dateString);
+                    return date.toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'short',
+                        day: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                } catch (error) {
+                    return 'Invalid date';
+                }
+            }
+            
+            function formatCurrency(amount) {
+                if (typeof amount !== 'number' || isNaN(amount)) return '₱0.00';
+                return '₱' + amount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+            }
+            
+            // Safe versions of utility functions with better error handling
+            function safeFormatCurrency(amount) {
+                try {
+                    if (amount === null || amount === undefined || amount === '') return '₱0.00';
+                    const numAmount = typeof amount === 'string' ? parseFloat(amount) : amount;
+                    if (isNaN(numAmount)) return '₱0.00';
+                    return '₱' + numAmount.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                } catch (error) {
+                    console.error('Error formatting currency:', error);
+                    return '₱0.00';
+                }
+            }
+            
+            function safeGetQuantityUnit(quantity) {
+                try {
+                    if (!quantity) return '';
+                    if (typeof quantity === 'string') {
+                        // If quantity already includes unit, return empty string
+                        if (quantity.includes('kg') || quantity.includes('g') || quantity.includes('pcs') || 
+                            quantity.includes('lbs') || quantity.includes('tons')) {
+                            return '';
+                        }
+                    }
+                    // Default unit for numeric quantities
+                    return typeof quantity === 'number' ? 'pcs' : '';
+                } catch (error) {
+                    console.error('Error getting quantity unit:', error);
+                    return '';
+                }
+            }
+            
+            function escapeHtml(text) {
+                try {
+                    if (!text) return '';
+                    const div = document.createElement('div');
+                    div.textContent = text;
+                    return div.innerHTML;
+                } catch (error) {
+                    console.error('Error escaping HTML:', error);
+                    return text || '';
+                }
+            }
+            
+            function getPriorityBadgeClass(priority) {
+                try {
+                    switch((priority || 'normal').toLowerCase()) {
+                        case 'urgent': return 'bg-warning text-dark';
+                        case 'express': return 'bg-danger';
+                        case 'high': return 'bg-warning text-dark';
+                        case 'normal': 
+                        case 'standard': return 'bg-secondary';
+                        case 'low': return 'bg-light text-dark';
+                        default: return 'bg-secondary';
+                    }
+                } catch (error) {
+                    console.error('Error getting priority badge class:', error);
+                    return 'bg-secondary';
+                }
+            }
+            
+            function getStatusBadgeClass(status) {
+                try {
+                    switch((status || 'pending').toLowerCase()) {
+                        case 'pending': 
+                        case 'placed': return 'bg-warning text-dark';
+                        case 'processing': 
+                        case 'accepted': return 'bg-info text-white';
+                        case 'delivered': return 'bg-success';
+                        case 'rejected':
+                        case 'canceled': return 'bg-danger';
+                        default: return 'bg-secondary';
+                    }
+                } catch (error) {
+                    console.error('Error getting status badge class:', error);
+                    return 'bg-secondary';
+                }
+            }
+              function getQuantityUnit(quantity) {
+                if (typeof quantity === 'string') {
+                    // If quantity already includes unit, return empty string
+                    if (quantity.includes('kg') || quantity.includes('g') || quantity.includes('pcs') || 
+                        quantity.includes('lbs') || quantity.includes('tons')) {
+                        return '';
+                    }
+                }
+                // Default unit for numeric quantities
+                return typeof quantity === 'number' ? 'pcs' : '';
+            }
+            
+            // Dashboard analytics functionality
+            function loadDashboardStatistics() {
+                fetch('/farmer/statistics')
+                    .then(response => response.json())
+                    .then(data => {
+                        updateStatisticsDisplay(data);
+                    })
+                    .catch(error => {
+                        console.error('Error loading dashboard statistics:', error);
+                    });
+            }
+            
+            function updateStatisticsDisplay(stats) {
+                // Update order statistics
+                const orderStatsElements = {
+                    'pendingOrders': document.querySelector('[data-stat="pending-orders"]'),
+                    'processingOrders': document.querySelector('[data-stat="processing-orders"]'),
+                    'deliveredOrders': document.querySelector('[data-stat="delivered-orders"]'),
+                    'totalOrders': document.querySelector('[data-stat="total-orders"]')
+                };
+                
+                // Update inventory statistics
+                const inventoryStatsElements = {
+                    'totalItems': document.querySelector('[data-stat="total-items"]'),
+                    'lowStockItems': document.querySelector('[data-stat="low-stock-items"]')
+                };
+                
+                // Update revenue statistics
+                const revenueStatsElements = {
+                    'totalRevenue': document.querySelector('[data-stat="total-revenue"]'),
+                    'monthlyRevenue': document.querySelector('[data-stat="monthly-revenue"]')
+                };
+                
+                // Update elements if they exist
+                Object.keys(orderStatsElements).forEach(key => {
+                    const element = orderStatsElements[key];
+                    if (element && stats[key] !== undefined) {
+                        element.textContent = stats[key];
+                    }
+                });
+                
+                Object.keys(inventoryStatsElements).forEach(key => {
+                    const element = inventoryStatsElements[key];
+                    if (element && stats[key] !== undefined) {
+                        element.textContent = stats[key];
+                    }
+                });
+                
+                Object.keys(revenueStatsElements).forEach(key => {
+                    const element = revenueStatsElements[key];
+                    if (element && stats[key] !== undefined) {
+                        const value = parseFloat(stats[key]);
+                        element.textContent = '₱' + value.toFixed(2);
+                    }
+                });
+            }
+              // Load statistics on page load and refresh every 30 seconds
+            document.addEventListener('DOMContentLoaded', function() {
+                loadDashboardStatistics();
+                setInterval(loadDashboardStatistics, 30000); // Refresh every 30 seconds
+            });
+            
+            // Advanced filtering functionality
+            function applyAdvancedFilters() {
+                const dateFrom = document.getElementById('dateFrom').value;
+                const dateTo = document.getElementById('dateTo').value;
+                const amountFrom = document.getElementById('amountFrom').value;
+                const amountTo = document.getElementById('amountTo').value;
+                const customerFilter = document.getElementById('customerFilter').value.toLowerCase();
+                
+                const orderRows = document.querySelectorAll('.order-row');
+                
+                orderRows.forEach(row => {
+                    let visible = true;
+                    
+                    // Date filtering
+                    if (dateFrom || dateTo) {
+                        const orderDate = row.getAttribute('data-order-date');
+                        if (orderDate) {
+                            const orderDateTime = new Date(orderDate);
+                            
+                            if (dateFrom && orderDateTime < new Date(dateFrom)) {
+                                visible = false;
+                            }
+                            if (dateTo && orderDateTime > new Date(dateTo)) {
+                                visible = false;
+                            }
+                        }
+                    }
+                    
+                    // Amount filtering
+                    if (amountFrom || amountTo) {
+                        const totalAmount = parseFloat(row.getAttribute('data-total-amount')) || 0;
+                        
+                        if (amountFrom && totalAmount < parseFloat(amountFrom)) {
+                            visible = false;
+                        }
+                        if (amountTo && totalAmount > parseFloat(amountTo)) {
+                            visible = false;
+                        }
+                    }
+                    
+                    // Customer filtering
+                    if (customerFilter) {
+                        const customer = row.getAttribute('data-customer').toLowerCase();
+                        if (!customer.includes(customerFilter)) {
+                            visible = false;
+                        }
+                    }
+                    
+                    // Apply visibility
+                    if (visible) {
+                        row.classList.remove('empty-state-hidden');
+                    } else {
+                        row.classList.add('empty-state-hidden');
+                    }
+                });
+                
+                updateOrderCount();
+                
+                // Close dropdown
+                const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('advancedFiltersDropdown'));
+                if (dropdown) {
+                    dropdown.hide();
+                }
+                
+                // Show applied filters feedback
+                showFilterFeedback();
+            }
+            
+            function clearAdvancedFilters() {
+                // Clear form inputs
+                document.getElementById('dateFrom').value = '';
+                document.getElementById('dateTo').value = '';
+                document.getElementById('amountFrom').value = '';
+                document.getElementById('amountTo').value = '';
+                document.getElementById('customerFilter').value = '';
+                
+                // Show all rows
+                const orderRows = document.querySelectorAll('.order-row');
+                orderRows.forEach(row => {
+                    row.classList.remove('empty-state-hidden');
+                });
+                
+                updateOrderCount();
+                
+                // Close dropdown
+                const dropdown = bootstrap.Dropdown.getInstance(document.getElementById('advancedFiltersDropdown'));
+                if (dropdown) {
+                    dropdown.hide();
+                }
+                
+                // Clear any search
+                const searchInput = document.getElementById('orderSearch');
+                if (searchInput) {
+                    searchInput.value = '';
+                }
+            }
+            
+            function showFilterFeedback() {
+                // Create or update filter feedback
+                let feedback = document.getElementById('filterFeedback');
+                if (!feedback) {
+                    feedback = document.createElement('div');
+                    feedback.id = 'filterFeedback';
+                    feedback.className = 'alert alert-info alert-dismissible fade show mt-2';
+                    
+                    const searchContainer = document.querySelector('.order-search-input').parentNode;
+                    searchContainer.insertAdjacentElement('afterend', feedback);
+                }
+                
+                feedback.innerHTML = `
+                    <i class="bi bi-funnel me-2"></i>Advanced filters applied. 
+                    <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="clearAdvancedFilters()">
+                        Clear Filters
+                    </button>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                `;
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    if (feedback) {
+                        const alert = bootstrap.Alert.getInstance(feedback);
+                        if (alert) {
+                            alert.close();
+                        }
+                    }
+                }, 5000);
+            }
+    </script>
+
 </body>
 </html>
